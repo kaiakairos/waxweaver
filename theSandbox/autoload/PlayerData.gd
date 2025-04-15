@@ -105,6 +105,7 @@ func addItem(itemID,amount,rangeMin:int=0,rangeMax:int=40):
 	
 	var emptySlot = findEmptySlot(rangeMin,rangeMax)
 	if emptySlot == null:
+		BlockData.spawnItemRaw(self.x, self.y, itemID, self.planet)
 		return itemCountLeft
 	
 	if itemCountLeft > itemMax:
