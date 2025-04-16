@@ -77,7 +77,7 @@ var holdingtick :int = 0
 var justswapped :bool = false
 
 var jumpsRemaining :int = 0
-var hoverSecs :int= 0
+var hoverSecs :float= 0
 var dashIdle :int = 0
 var canDash :bool = true
 var dashDelay :int = 0
@@ -455,10 +455,10 @@ func WATERJUMPCAMERALETSGO(body,vel,rot,onFloor,delta):
 	elif Stats.specialProperties.has("bubblehover"):
 		if hoverSecs == 0:
 			if Input.is_action_just_pressed("jump"):
-				hoverSecs = 120
+				hoverSecs = 2
 		elif hoverSecs > 0 and Input.is_action_pressed("jump"):
 			hoverSecs -= delta
-			vel.y = lerp(vel.y,0.0,0.5)
+			vel.y = lerp(vel.y, 0.0, 1 / ((1/delta) / Engine.physics_ticks_per_second + 1))
 			airTime = 0
 			$Bubble.scale = lerp($Bubble.scale,Vector2(1,1),0.2)
 			$Bubble.rotation = sprite.rotation
