@@ -2,15 +2,15 @@ extends Enemy
 
 @onready var sprite = $Sprite
 
-var ticksAlive :int=0
+var secsAlive :float=0
 
 var landed :bool = false
 
 func _process(delta):
-	ticksAlive += 1
+	secsAlive += delta
 	var vel = getVelocity()
 	
-	if ticksAlive > 10:
+	if secsAlive > (1/6):
 		vel.y += 1000 * delta
 	
 	setVelocity(vel)
@@ -26,7 +26,7 @@ func _process(delta):
 		velocity = velocity.bounce(collider.get_normal()) * 0.5
 		landed = true
 		
-	if ticksAlive > 10000:
+	if secsAlive > 150:
 		queue_free()
 	
 	setLight(0.7)

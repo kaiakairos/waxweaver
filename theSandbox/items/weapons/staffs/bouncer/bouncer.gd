@@ -3,15 +3,15 @@ extends Enemy
 var life :float= 0.0
 var dead :bool= false
 
-var deadTicks :float=0.0
+var deadSecs :float=0.0
 
 var bounces :int = 0
 
 func _process(delta):
 	
 	if dead:
-		deadTicks += delta
-		if deadTicks > 1.0:
+		deadSecs += delta
+		if deadSecs > 1.0:
 			queue_free()
 		return
 	

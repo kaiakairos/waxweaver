@@ -11,10 +11,9 @@ var planets = []
 
 var planetsShouldGenerate = true
 
-var autosaveTicks :int= 0
+var autosaveSecs :float= 0.0
+var periodicCheckSecs :float= 0.0
 var lastSave :float= Time.get_unix_time_from_system()
-
-var ticks :int= -600
 
 func _ready():
 	planetsShouldGenerate = !Saving.has_save(Saving.loadedFile)
@@ -243,11 +242,11 @@ func _exit_tree():
 
 func _process(delta):
 	if Options.options["autosaving"]:
-		autosaveTicks += 1
-	if autosaveTicks > 10800: # every 3 minutes
+		autosaveSecs += delta
+	if autosaveSecs > 180: # every 3 minutes
 		if GlobalRef.player.velocity.length() < 2.0: # make sure player is standing still
 			Saving.autosave()
-			autosaveTicks = 0
+			autosaveSecs = 0
 			print("Game autosaved!")
 	
 	if Input.is_action_just_pressed("pause"):
@@ -258,8 +257,9 @@ func _process(delta):
 		$PauseMenu/optionsMenu.hide()
 		$PauseMenu/achievementsMenu.hide()
 
-	ticks += 1
-	if ticks % 300 == 0:
+	periodicCheckSecs += delta
+	if periodicCheckSecs > 5:
+		periodicCheckSecs = 0
 		if GlobalRef.player.position.length() < 64:
 			AchievementData.unlockMedal("findCore")
 	

@@ -14,7 +14,8 @@ var state :int=0
 
 @onready var selectedslot = $savefiles/ScrollContainer/VBoxContainer/saveslot
 
-var waitUntilMusic :int= 0
+var secs :int= 0
+var hasMusicPlayed :bool= false
 
 var holdToClearSave :int = 0
 
@@ -43,11 +44,15 @@ func _ready():
 			enterState(5)
 
 func _process(delta):
+	secs += delta
+
 	$bg/backgroundLayer.scroll(Vector2(0.1,0))
 	$MouseIcon.position = get_local_mouse_position()
-	if waitUntilMusic == 1200:
+
+	if !hasMusicPlayed && secs > 20:
 		$Music.play()
-	waitUntilMusic += 1
+		hasMusicPlayed = true
+
 	if Input.is_action_pressed("pause"):
 		holdToClearSave += 1
 		if holdToClearSave > 600:

@@ -3,7 +3,7 @@ extends Enemy
 var life :float= 0.0
 var dead :bool= false
 
-var deadTicks :float=0.0
+var deadSecs :float=0.0
 
 @onready var penis = preload("res://object_scenes/particles/explosion/explosion_particle.tscn")
 
@@ -14,8 +14,8 @@ var immortalTiles :Array[int]= [5,63,34,128,113,147]
 func _process(delta):
 	
 	if dead:
-		deadTicks += delta
-		if deadTicks > 1.0:
+		deadSecs += delta
+		if deadSecs > 1.0:
 			queue_free()
 		return
 	

@@ -2,7 +2,7 @@ extends Enemy
 
 @onready var sprite = $Sprite
 
-var ticksAlive :int=0
+var secsAlive :float=0.0
 
 var landed :bool = false
 
@@ -22,14 +22,14 @@ func setItemData(i):
 	itemData = i
 
 func _process(delta):
-	ticksAlive += 1
+	secsAlive += delta
 	
 	if landed:
 		return
 	
 	var vel = getVelocity()
 	
-	if ticksAlive > 10:
+	if secsAlive > (1/6):
 		vel.y += 1000 * delta
 	
 	setVelocity(vel)
@@ -44,7 +44,7 @@ func _process(delta):
 		landed = true
 		splash()
 		
-	if ticksAlive > 2000:
+	if secsAlive > 30:
 		queue_free()
 	
 

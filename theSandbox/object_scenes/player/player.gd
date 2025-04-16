@@ -33,9 +33,9 @@ var state = 0
 ## States: 0 = REGULAR, 1 = SITTING, 2 = LADDER, 3 = BED
 var movementState = 0
 
-var animTick = 0
-var ladderTick = 0
-var lastOnLadder :int= 0 # for determining if the player can attach to ladder again
+var animSecs :float= 0
+var ladderSecs :float= 0
+var lastOnLadder :float= 0 # for determining if the player can attach to ladder again
 var maxCameraDistance := 0
 
 var lastTileItemUsedOn := Vector2(-10,-10)
@@ -44,7 +44,7 @@ var noClip = false
 var noClipSpeed = 200
 
 var tick = 0
-var blinkTick = 0
+var blinkSecs :float= 0
 
 var beingKnockedback = false
 
@@ -77,7 +77,7 @@ var holdingtick :int = 0
 var justswapped :bool = false
 
 var jumpsRemaining :int = 0
-var hoverTicks :int= 0
+var hoverSecs :int= 0
 var dashIdle :int = 0
 var canDash :bool = true
 var dashDelay :int = 0
@@ -383,7 +383,7 @@ func WATERJUMPCAMERALETSGO(body,vel,rot,onFloor,delta):
 	
 	# attach to ladder if holding up
 	if lastOnLadder > 0:
-		lastOnLadder -= 1 # subtract ladder ticks
+		lastOnLadder -= delta # subtract ladder msecs
 	if body.DATAC.getTileData(tile.x,tile.y) == 25:
 		if Input.is_action_pressed("move_up") or Input.is_action_pressed("move_down"):
 			
@@ -414,7 +414,7 @@ func WATERJUMPCAMERALETSGO(body,vel,rot,onFloor,delta):
 		wasInWater = true
 		canDash = true
 		$Bubble.scale = Vector2.ZERO
-		hoverTicks = 0
+		hoverSecs = 0
 		jumpsRemaining = Stats.extraJumps
 		healthComponent.inflictStatus("wet",8)
 		vel.y = min(vel.y,30 + (Stats.swimMult * 2.5))
@@ -433,12 +433,12 @@ func WATERJUMPCAMERALETSGO(body,vel,rot,onFloor,delta):
 	if onFloor: # this is where the regular jump is done
 		jumpsRemaining = Stats.extraJumps
 		canDash = true
-		if hoverTicks > 0 and $Bubble.scale.x > 0.1:
+		if hoverSecs > 0 and $Bubble.scale.x > 0.1:
 			$Bubble.scale = Vector2.ZERO
 			var fart = load("res://object_scenes/particles/bubblewand/bubblepop.tscn").instantiate()
 			fart.position = position
 			get_parent().add_child(fart)
-		hoverTicks = 0
+		hoverSecs = 0
 		if Input.is_action_just_pressed("jump") and !GlobalRef.chatIsOpen:
 			vel.y = Stats.getJump()
 			
@@ -453,22 +453,22 @@ func WATERJUMPCAMERALETSGO(body,vel,rot,onFloor,delta):
 			fart.rotation = sprite.rotation
 			get_parent().add_child(fart)
 	elif Stats.specialProperties.has("bubblehover"):
-		if hoverTicks == 0:
+		if hoverSecs == 0:
 			if Input.is_action_just_pressed("jump"):
-				hoverTicks = 120
-		elif hoverTicks > 0 and Input.is_action_pressed("jump"):
-			hoverTicks -= 1
+				hoverSecs = 120
+		elif hoverSecs > 0 and Input.is_action_pressed("jump"):
+			hoverSecs -= delta
 			vel.y = lerp(vel.y,0.0,0.5)
 			airTime = 0
 			$Bubble.scale = lerp($Bubble.scale,Vector2(1,1),0.2)
 			$Bubble.rotation = sprite.rotation
-			if hoverTicks == 0:
-				hoverTicks = -10
+			if hoverSecs <= 0:
+				hoverSecs = -1
 				$Bubble.scale = Vector2.ZERO
 				var fart = load("res://object_scenes/particles/bubblewand/bubblepop.tscn").instantiate()
 				fart.position = position
 				get_parent().add_child(fart)
-		elif Input.is_action_just_released("jump") and hoverTicks > 0:
+		elif Input.is_action_just_released("jump") and hoverSecs > 0:
 			$Bubble.scale = Vector2.ZERO
 			var fart = load("res://object_scenes/particles/bubblewand/bubblepop.tscn").instantiate()
 			fart.position = position
@@ -490,13 +490,13 @@ func chairMovement(delta):
 		movementState = 0
 	
 	squishSprites(1.0)
-	eyeBallAnim()
+	eyeBallAnim(delta)
 	updateLight()
 	ensureCamPosition()
 
 func ladderMovement(delta):
 	
-	lastOnLadder = 25
+	lastOnLadder = 0.4
 	
 	if beingKnockedback: # cancel ladder state if hit
 		movementState = 0
@@ -516,15 +516,16 @@ func ladderMovement(delta):
 	
 	## animtation
 	if vdir != 0:
-		ladderTick += 1
-		if ladderTick % 7 == 0:
+		ladderSecs += delta
+		if ladderSecs > 0.14:
 			if getPlayerFrame() == 8:
 				setAllPlayerFrames(9)
 			else:
 				setAllPlayerFrames(8)
 			SoundManager.playSound("items/ladderClimb",global_position,1.2,0.1)
+			ladderSecs = 0
 	else:
-		ladderTick = 6
+		ladderSecs = 0.139
 	
 	var obj = planetOn
 	
@@ -568,7 +569,7 @@ func ladderMovement(delta):
 	move_and_slide()
 	
 	squishSprites(1.0)
-	eyeBallAnim()
+	eyeBallAnim(delta)
 	updateLight()
 	ensureCamPosition()
 	
@@ -998,7 +999,7 @@ func playerAnimation(dir,newVel,delta):
 	if dir != 0:
 		flipPlayer(dir)
 	
-	eyeBallAnim()
+	eyeBallAnim(delta)
 	
 	var flor = isOnFloor(rotated*(PI/2))
 	if shipOn != null:
@@ -1016,23 +1017,24 @@ func playerAnimation(dir,newVel,delta):
 	elif animationPlayer.current_animation != "walk":
 			animationPlayer.play("walk")
 
-func eyeBallAnim():
+func eyeBallAnim(delta):
 	var glob = global_position - get_global_mouse_position()
 	var gay = glob.rotated(-GlobalRef.camera.rotation)
 	$PlayerLayers/eye/Pupil.offset = gay.normalized() * Vector2(-sprite.scale.x,-1)
 	
 	# silly blink
-	blinkTick += 1
-	if blinkTick > 120:
+	blinkSecs += delta
+	if blinkSecs > 2:
 		if randi() % 60 == 0:
 			$PlayerLayers/eye.visible = false
-			blinkTick = -5
+			blinkSecs = -0.1
 			if randi() % 6 == 0:
-				blinkTick = -15
-			
-	if blinkTick == 0 or blinkTick == -10:
+				blinkSecs = -0.3
+	
+	# this could probably be refactored, leftover jank from move to deltat
+	if blinkSecs > 0 or (blinkSecs > -0.2 && blinkSecs < -0.1):
 		$PlayerLayers/eye.visible = true
-	elif blinkTick == -5:
+	elif blinkSecs > -0.1:
 		$PlayerLayers/eye.visible = false
 
 func setAllPlayerFrames(frame:int):
