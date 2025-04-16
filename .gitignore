@@ -1,7 +1,14 @@
+# Ignore scons db
+.sconsign.dblite
 
-#Ignore godot c++ repository
+# Ignore godot c++ repository
 godot-cpp/
 
-#Ignore .godot folder
+# Ignore .godot
 theSandbox/.godot
-theSandbox/bin/~libgdexample.windows.template_debug.x86_64.dll
+
+# Ignore precompiled binaries
+theSandbox/bin
+src/*.o
+src/*.os
+src/*.obj
