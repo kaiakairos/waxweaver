@@ -5,15 +5,15 @@ var dead :bool= false
 func _ready():
 	$start.emitting = true
 
-func _process(delta):
+func _physics_process(delta):
 	if dead:
 		return
 	var t = to_local(GlobalRef.player.global_position).normalized()
 	
-	var speed :float= 200.0
+	var speed :float= 200
 	var dot = velocity.normalized().dot( to_local(GlobalRef.player.global_position).normalized() )
 	if dot > 0.8:
-		speed = 240.0
+		speed = 240
 	
 	velocity = lerp(velocity,t*speed,0.05)
 	var c = move_and_collide(velocity * delta)

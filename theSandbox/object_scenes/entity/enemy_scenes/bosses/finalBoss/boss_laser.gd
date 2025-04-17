@@ -2,7 +2,10 @@ extends Node2D
 
 var dir :int = 1 # can be 1 or -1
 
-var aliveTime :int = 120
+var aliveTime :float= 2
+var jitterSecs :float= 0
+var jitterState :bool= false
+var jitterFrequency :float= 0.08
 
 var charged :bool = false
 
@@ -12,26 +15,29 @@ func _ready():
 	$AudioStreamPlayer2D.play()
 	
 func _process(delta):
-	
-	if charged:
-		if aliveTime % 2 == 0:
-			$Line2D.width = 12
+	jitterSecs += delta
+	var shouldJitter :bool= jitterSecs > jitterFrequency
+	$AudioStreamPlayer2D.pitch_scale += delta*0.6
+	if shouldJitter:
+		jitterState = !jitterState
+		jitterSecs = 0
+		if charged:
+			if jitterState:
+				$Line2D.width = 12
+			else:
+				$Line2D.width = 8
 		else:
-			$Line2D.width = 8
-	else:
-		if aliveTime % 2 == 0:
-			$Line2D.width = 2
-		else:
-			$Line2D.width = 0
+			if jitterState:
+				$Line2D.width = 2
+			else:
+				$Line2D.width = 0
 		
-		$AudioStreamPlayer2D.pitch_scale += 0.01
-		
-		if aliveTime < 80:
+		if aliveTime < (8.0/6.0):
 			charged = true
 			$AudioStreamPlayer2D.pitch_scale = 2.0
 			$Hurtbox/CollisionShape2D.call_deferred("set_disabled",false)
 	
-	aliveTime -= 1
+	aliveTime -= delta
 	rotate(dir * 0.8 * delta)
 	
 	
