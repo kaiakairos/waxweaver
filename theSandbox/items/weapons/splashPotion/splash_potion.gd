@@ -29,7 +29,7 @@ func _process(delta):
 	
 	var vel = getVelocity()
 	
-	if secsAlive > (1/6):
+	if secsAlive > (1.0/6.0):
 		vel.y += 1000 * delta
 	
 	setVelocity(vel)
