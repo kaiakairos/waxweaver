@@ -1347,8 +1347,6 @@ func spawnGiftParticle():
 
 func dashingParticle():
 	var vel = velocity.rotated(-getProperRotationSource())
-	print(dashParticleSecs)
-	print(2/60)
 	if dashParticleSecs > (2.0/60.0):
 		dashParticleSecs = 0
 		var ins = aura.instantiate()
