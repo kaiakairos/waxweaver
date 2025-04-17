@@ -78,12 +78,12 @@ var justswapped :bool = false
 
 var jumpsRemaining :int = 0
 var hoverSecs :float= 0
-var dashIdle :int = 0
 var canDash :bool = true
 var dashDelaySecs :float= 0
 var dashParticleSecs :float= 0
 
-var holdingDirection :int = 0
+var activitySecs :float= 0
+var holdingDirectionSecs :float= 0
 
 
 ######################################################################
@@ -270,22 +270,21 @@ func normalMovement(delta):
 		dir *= -1
 	
 	if dir != 0:
-		
-		
+		var doubletapWindowSecs = (1.0/6.0) # NOTE: make this a setting?
 		if GlobalRef.playerSide == int(dir == 1):
-			if dashIdle < 10 and dashIdle > 0 and holdingDirection < 10:
+			if activitySecs < doubletapWindowSecs and activitySecs > 0 and holdingDirectionSecs < (1.0/6.0):
 				doubleTapped = true
-		dashIdle = -1
+		activitySecs = 0
 		
 		GlobalRef.playerSide = int(dir == 1)
 		
-		holdingDirection += 1
+		holdingDirectionSecs += delta
 		
 		if Input.is_action_just_pressed("move_left") or Input.is_action_just_pressed("move_right"):
-			holdingDirection = 0
+			holdingDirectionSecs = 0
 		
 	else:
-		dashIdle += 1
+		activitySecs += delta
 	
 	if GlobalRef.chatIsOpen:
 		dir = 0
