@@ -15,8 +15,8 @@ var currentDir :float = 0.0
 
 var state :int = 0 # orbit, dash, playerDied
 
-var dashAngle :Vector2 = Vector2.ZERO
-var dashTicks :int = 0
+var dashAngle :Vector2= Vector2.ZERO
+var dashSecs :float= 0
 
 @onready var baseTexture = preload("res://object_scenes/entity/enemy_scenes/bosses/bossWorm/body.png")
 @onready var metalTexture = preload("res://object_scenes/entity/enemy_scenes/bosses/bossWorm/metal.png")
@@ -24,8 +24,9 @@ var dashTicks :int = 0
 var isMetal :bool = false
 var isTransforming :bool = false
 
-var tick :int = 0
+var tick :int= 0
 
+var shakeSecs :float= 0
 var shakeCamera = true
 var slow = false
 
@@ -35,7 +36,7 @@ func _ready():
 		ins.hc = $HealthComponent
 		segmentContainer.add_child(ins)
 
-func _process(delta):
+func _physics_process(delta):
 	var oldPosition = position
 	
 	if GlobalRef.player.dead and state != 2:
@@ -62,6 +63,7 @@ func _process(delta):
 	
 	if shakeCamera:
 		tick += 1
+		shakeSecs += delta
 		if getSurface() < 0:
 			if !slow:
 				SoundManager.playSound("enemy/boss/worm/groundBurst",global_position,1.5)
@@ -73,7 +75,7 @@ func _process(delta):
 				GlobalRef.camera.shake(1)
 		else:
 			GlobalRef.camera.shake(2)
-		if tick > 540:
+		if shakeSecs > 9:
 			GlobalRef.camera.resetShake()
 			shakeCamera = false
 
@@ -98,15 +100,15 @@ func orbit(delta):
 	if randi() % 300 == 0:
 		enterDashState()
 	if healthComp.getHealthPercent() < 0.2:
-			enterDashRandom()
+		enterDashRandom()
 
 func dash(delta):
 	var mult = (1.0 - healthComp.getHealthPercent()) + 0.5
 	velocity = dashAngle.normalized() * 300 * mult
 	move_and_slide()
 	
-	dashTicks -= 1
-	if dashTicks <= 0:
+	dashSecs -= delta
+	if dashSecs <= 0:
 		
 		state = 0
 		if healthComp.getHealthPercent() < 0.2:
@@ -140,7 +142,7 @@ func moveBody(oldPos:Vector2,newPos:Vector2):
 
 func enterDashState():
 	dashAngle = to_local(GlobalRef.player.global_position)
-	dashTicks = 60
+	dashSecs = 1
 	state = 1
 
 func enterDashRandom():
@@ -152,7 +154,7 @@ func enterDashRandom():
 		rY = 0
 	
 	dashAngle = to_local(GlobalRef.player.global_position + Vector2(rX,rY))
-	dashTicks = 40 + (randi() % 40)
+	dashSecs = (40.0 + float(randi() % 40)) / 60.0
 	state = 1
 
 func tranform():
@@ -197,3 +199,4 @@ func _on_health_component_died():
 	# above player rather than in the ground
 	
 	AchievementData.unlockMedal("defeatWorm")
+
