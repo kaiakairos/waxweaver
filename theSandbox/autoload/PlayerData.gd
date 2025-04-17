@@ -26,9 +26,9 @@ var money :int = 0
 signal updateMoney
 
 ## mana ##
-var manaMax :float= 250
-var mana :float= 250
-var manaChargeDelaySecs :float= 0
+var manaMax :int= 250
+var mana :int = 250
+var manaIdleTicks :int = 0
 
 var displayedCrafting :int = -1
 signal changedDisplayedCrafting
@@ -55,16 +55,16 @@ func _process(delta):
 	if !is_instance_valid(GlobalRef.player):
 		return
 	
-	if manaChargeDelaySecs > 0:
-		manaChargeDelaySecs -= delta
+	if manaIdleTicks > 0:
+		manaIdleTicks -= 1
 	else:
 		if mana == manaMax - 1:
 			SoundManager.playSound("items/manaFull",GlobalRef.player.global_position,1.2)
 			GlobalRef.player.manaFilled()
 		
-		mana += delta*60
+		mana += 1
 		if GlobalRef.playerHC.checkIfHasEffect("focused"):
-			mana += delta*60
+			mana += 1
 		mana = min(mana,manaMax)
 	
 func useMana(amount) -> bool:
@@ -72,7 +72,7 @@ func useMana(amount) -> bool:
 		return false
 	
 	mana -= amount
-	manaChargeDelaySecs = 1.5
+	manaIdleTicks = 90
 	return true
 
 func initializeInventory():
