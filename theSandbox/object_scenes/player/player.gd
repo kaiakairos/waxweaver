@@ -80,7 +80,8 @@ var jumpsRemaining :int = 0
 var hoverSecs :float= 0
 var dashIdle :int = 0
 var canDash :bool = true
-var dashDelay :int = 0
+var dashDelaySecs :float= 0
+var dashParticleSecs :float= 0
 
 var holdingDirection :int = 0
 
@@ -310,13 +311,15 @@ func normalMovement(delta):
 	var newVel = velocity.rotated(-rotSource)
 	newVel.x = lerp(newVel.x, targetSpeed, velLerp)
 	
-	if doubleTapped and canDash and dashDelay <= 0 and Stats.hasProperty("dash"):
+	if doubleTapped and canDash and dashDelaySecs <= 0 and Stats.hasProperty("dash"):
 		newVel.x = 1800.0 * dir * Stats.speedMult
 		canDash = false
-		dashDelay = 30
+		dashDelaySecs = 1.5
+		dashParticleSecs = 0
 		beingKnockedback = false
-	if dashDelay > 0:
-		dashDelay -= 1
+	if dashDelaySecs > 0:
+		dashDelaySecs -= delta
+		dashParticleSecs += delta
 		dashingParticle()
 	
 	newVel.y += Stats.getGravity() * delta
@@ -1343,8 +1346,11 @@ func spawnGiftParticle():
 	get_parent().add_child(ins)
 
 func dashingParticle():
-	var vel = velocity.rotated(-getProperRotationSource()) 
-	if dashDelay % 2 == 0 and abs(vel.x) > 150:
+	var vel = velocity.rotated(-getProperRotationSource())
+	print(dashParticleSecs)
+	print(2/60)
+	if dashParticleSecs > (2.0/60.0):
+		dashParticleSecs = 0
 		var ins = aura.instantiate()
 		ins.startFrame = $PlayerLayers/body.frame
 		ins.position = position
