@@ -5,7 +5,7 @@ var dead :bool= false
 
 var deadSecs :float=0.0
 
-func _process(delta):
+func _physics_process(delta):
 	
 	if dead:
 		deadSecs += delta

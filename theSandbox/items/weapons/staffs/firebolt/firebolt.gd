@@ -12,8 +12,7 @@ func _ready():
 		$Hurtbox.enemyBox = true
 		$Hurtbox.damage = 25
 
-func _process(delta):
-	
+func _physics_process(delta):
 	if dead:
 		deadSecs += delta
 		if deadSecs > 1.0:

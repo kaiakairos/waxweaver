@@ -11,8 +11,7 @@ func _ready():
 	if hitplayer:
 		$Hurtbox.enemyBox = true
 
-func _process(delta):
-	
+func _physics_process(delta):
 	if dead:
 		deadSecs += delta
 		if deadSecs > 1.0:
