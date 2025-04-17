@@ -296,12 +296,19 @@ func normalMovement(delta):
 		106:
 			speedAdd = -GlobalRef.conveyorspeed
 	
+	var targetSpeed :float= (dir * speed) + speedAdd
+	
+	var drag :float= 0.04
+	if beingKnockedback:
+		drag = 0.4
+	# NOTE: put ice physics here? floorDetector.getFloorTile() match 86
+	
+	# FIXME: despite using delta, there are subtle differences at different hz
+	# it is very subtle though, and can *probably* be ignored
+	var velLerp :float= 1.0-pow(2.0,(-delta/drag))
 	
 	var newVel = velocity.rotated(-rotSource)
-	if beingKnockedback:
-		newVel.x = lerp(newVel.x, (dir * speed) + speedAdd, 0.025) # make framerate independent
-	else:
-		newVel.x = lerp(newVel.x, (dir * speed) + speedAdd, 1.0-pow(2.0,(-delta/0.04)))
+	newVel.x = lerp(newVel.x, targetSpeed, velLerp)
 	
 	if doubleTapped and canDash and dashDelay <= 0 and Stats.hasProperty("dash"):
 		newVel.x = 1800.0 * dir * Stats.speedMult
@@ -459,6 +466,7 @@ func WATERJUMPCAMERALETSGO(body,vel,rot,onFloor,delta):
 		elif hoverSecs > 0 and Input.is_action_pressed("jump"):
 			hoverSecs -= delta
 			vel.y = lerp(vel.y, 0.0, 1 / ((1/delta) / Engine.physics_ticks_per_second + 1))
+			print(1 / ((1/delta) / Engine.physics_ticks_per_second + 1))
 			airTime = 0
 			$Bubble.scale = lerp($Bubble.scale,Vector2(1,1),0.2)
 			$Bubble.rotation = sprite.rotation
