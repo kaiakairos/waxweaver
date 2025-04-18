@@ -5,9 +5,11 @@ extends Enemy
 @onready var alsoline = $Line2D2
 @onready var s = preload("res://items/weapons/staffs/lightning/lightningexplosion.tscn")
 
-var framesAlive :int = 0
+var timeAlive :float = 0
 
 var shotByPlayer :bool = true
+
+var zapped :bool = false
 
 func _ready():
 	rotation = velocity.angle()
@@ -47,9 +49,12 @@ func zap():
 	get_parent().add_child(ins)
 	
 func _process(delta):
-	framesAlive += 1
-	if framesAlive == 1:
-		zap()
 	
-	if framesAlive > 3:
+	if timeAlive >= 1 and !zapped:
+		zap()
+		zapped = true
+	
+	timeAlive += 60.0*delta
+	
+	if timeAlive > 3.0:
 		queue_free()

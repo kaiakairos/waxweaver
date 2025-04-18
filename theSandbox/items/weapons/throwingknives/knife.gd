@@ -2,13 +2,13 @@ extends Enemy
 
 @onready var sprite = $Knife
 
-var ticksAlive :int=0
+var ticksAlive :float=0
 
 func _process(delta):
-	ticksAlive += 1
+	ticksAlive += delta
 	var vel = getVelocity()
 	
-	if ticksAlive > 10:
+	if ticksAlive > 0.166:
 		vel.y += 1000 * delta
 	
 	setVelocity(vel)
@@ -25,7 +25,7 @@ func _process(delta):
 		sprite.rotation = collider.get_normal().angle() - (PI/2)
 		sprite.z_index = -2
 		
-	if ticksAlive > 1000:
+	if ticksAlive > 300.0:
 		queue_free()
 
 func _on_hurtbox_hitsomething():

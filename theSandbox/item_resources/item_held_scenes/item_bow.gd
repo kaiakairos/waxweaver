@@ -20,15 +20,19 @@ func onUsing(delta):
 	
 	if tick <= 0.0:
 		fire(delta)
-		tick += itemData.fireRate * delta
+		tick = (itemData.fireRate*0.0166666) / 60.0
 	else:
-		tick -= 60.0*delta * Stats.getAttackSpeedMult()
-
+		tick -= delta * Stats.getAttackSpeedMult()
+	
+	print(tick)
+	
 func onNotUsing(delta):
 	visible = false
 	if tick > 0.0:
-		tick -= 60.0*delta
-
+		tick -= delta * Stats.getAttackSpeedMult()
+	
+	print(tick)
+	
 func fire(delta):
 	
 	

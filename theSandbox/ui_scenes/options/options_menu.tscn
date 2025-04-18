@@ -126,11 +126,12 @@ offset_top = 49.0
 offset_right = 186.0
 offset_bottom = 261.0
 theme = SubResource("Theme_kajlr")
+scroll_vertical = 100
 horizontal_scroll_mode = 0
 vertical_scroll_mode = 2
 
 [node name="g" type="ColorRect" parent="ScrollContainer"]
-custom_minimum_size = Vector2(3, 271.515)
+custom_minimum_size = Vector2(3, 328.53)
 layout_mode = 2
 mouse_filter = 2
 color = Color(1, 1, 1, 0)
@@ -269,7 +270,7 @@ horizontal_alignment = 2
 position = Vector2(9, 232)
 
 [node name="rotation" parent="ScrollContainer/g/buttons/rotateSlider" instance=ExtResource("2_6rvf4")]
-offset_right = 35.0
+offset_right = 80.0
 buttonText = "camera ease"
 
 [node name="rotslide" type="HSlider" parent="ScrollContainer/g/buttons/rotateSlider"]
@@ -298,6 +299,48 @@ offset_bottom = 17.0
 text = "normal"
 horizontal_alignment = 2
 
+[node name="maxfps" type="Node2D" parent="ScrollContainer/g/buttons"]
+position = Vector2(9, 275)
+
+[node name="maxfps" parent="ScrollContainer/g/buttons/maxfps" instance=ExtResource("2_6rvf4")]
+offset_right = 52.0
+tooltip_text = "experimental. may encounter bugs."
+buttonText = "max fps"
+
+[node name="maxfpsslider" type="HSlider" parent="ScrollContainer/g/buttons/maxfps"]
+offset_left = -1.0
+offset_top = 16.0
+offset_right = 152.0
+offset_bottom = 32.0
+theme_override_constants/center_grabber = 1
+theme_override_constants/grabber_offset = -2075
+theme_override_icons/grabber = ExtResource("4_p3wdg")
+theme_override_icons/grabber_highlight = ExtResource("4_p3wdg")
+theme_override_icons/grabber_disabled = ExtResource("4_p3wdg")
+theme_override_icons/tick = ExtResource("4_p3wdg")
+theme_override_styles/slider = SubResource("StyleBoxFlat_bfi1e")
+theme_override_styles/grabber_area = SubResource("StyleBoxFlat_fldro")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxFlat_3lk7d")
+max_value = 300.0
+value = 60.0
+scrollable = false
+
+[node name="maxfpslabel" type="Label" parent="ScrollContainer/g/buttons/maxfps"]
+modulate = Color(0.368627, 0.368627, 0.368627, 1)
+offset_left = 85.0
+offset_top = 1.0
+offset_right = 150.0
+offset_bottom = 17.0
+text = "60"
+horizontal_alignment = 2
+
+[node name="vsync" parent="ScrollContainer/g/buttons/maxfps" instance=ExtResource("2_6rvf4")]
+offset_left = -1.0
+offset_top = 34.0
+offset_right = 93.0
+offset_bottom = 51.0
+buttonText = "vsync: enabled"
+
 [connection signal="pressed" from="done" to="." method="_on_done_pressed"]
 [connection signal="pressed" from="ScrollContainer/g/buttons/dropshadow" to="." method="_on_dropshadow_pressed"]
 [connection signal="pressed" from="ScrollContainer/g/buttons/autosaving" to="." method="_on_autosaving_pressed"]
@@ -310,3 +353,6 @@ horizontal_alignment = 2
 [connection signal="value_changed" from="ScrollContainer/g/buttons/ambientslider/ambslide" to="." method="_on_ambslide_value_changed"]
 [connection signal="pressed" from="ScrollContainer/g/buttons/rotateSlider/rotation" to="." method="_on_rotation_pressed"]
 [connection signal="value_changed" from="ScrollContainer/g/buttons/rotateSlider/rotslide" to="." method="_on_rotslide_value_changed"]
+[connection signal="pressed" from="ScrollContainer/g/buttons/maxfps/maxfps" to="." method="_on_maxfps_pressed"]
+[connection signal="value_changed" from="ScrollContainer/g/buttons/maxfps/maxfpsslider" to="." method="_on_maxfpsslider_value_changed"]
+[connection signal="pressed" from="ScrollContainer/g/buttons/maxfps/vsync" to="." method="_on_vsync_pressed"]

@@ -11,7 +11,7 @@ var radius = 3
 
 var immortalTiles :Array[int]= [5,63,34,128,113,147]
 
-func _process(delta):
+func _physics_process(delta):
 	
 	if dead:
 		deadTicks += delta
@@ -29,7 +29,6 @@ func _process(delta):
 	life += delta
 	if life > 3.0:
 		deactivate()
-	
 
 func _on_hurtbox_hitsomething():
 	explode()

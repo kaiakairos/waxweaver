@@ -35,7 +35,7 @@ func _process(delta):
 	vel.y += 1000 * delta
 	
 	if isOnFloor():
-		vel.x = lerp(vel.x,0.0,0.02)
+		vel.x = lerp(vel.x,0.0,1.0 - pow(0.02,delta))
 		sprite.rotate( vel.x * delta * 0.2 )
 	else:
 		sprite.rotate( vel.x * delta * 0.1 )

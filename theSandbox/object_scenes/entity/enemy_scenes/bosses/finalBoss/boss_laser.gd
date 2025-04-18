@@ -2,7 +2,7 @@ extends Node2D
 
 var dir :int = 1 # can be 1 or -1
 
-var aliveTime :int = 120
+var aliveTime :float = 120
 
 var charged :bool = false
 
@@ -14,24 +14,24 @@ func _ready():
 func _process(delta):
 	
 	if charged:
-		if aliveTime % 2 == 0:
+		if roundi(aliveTime) % 2 == 0:
 			$Line2D.width = 12
 		else:
 			$Line2D.width = 8
 	else:
-		if aliveTime % 2 == 0:
+		if roundi(aliveTime) % 2 == 0:
 			$Line2D.width = 2
 		else:
 			$Line2D.width = 0
 		
-		$AudioStreamPlayer2D.pitch_scale += 0.01
+		$AudioStreamPlayer2D.pitch_scale += 0.01 * 60.0 * delta
 		
 		if aliveTime < 80:
 			charged = true
 			$AudioStreamPlayer2D.pitch_scale = 2.0
 			$Hurtbox/CollisionShape2D.call_deferred("set_disabled",false)
 	
-	aliveTime -= 1
+	aliveTime -= 60.0 * delta
 	rotate(dir * 0.8 * delta)
 	
 	

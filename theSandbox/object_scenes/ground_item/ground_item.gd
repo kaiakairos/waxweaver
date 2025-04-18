@@ -22,7 +22,7 @@ var tweening = false
 
 var parent
 
-var droppedByPlayer :int= 0
+var droppedByPlayer :float= 0
 var dropvel :Vector2 = Vector2.ZERO
 
 var frozen = false
@@ -59,7 +59,7 @@ func _ready():
 	
 func _process(delta):
 	
-	droppedByPlayer -= 1
+	droppedByPlayer -= 60.0 * delta
 	
 	if tweening:
 		return

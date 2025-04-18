@@ -11,7 +11,7 @@ var planets = []
 
 var planetsShouldGenerate = true
 
-var autosaveTicks :int= 0
+var autosaveTicks :float= 0
 var lastSave :float= Time.get_unix_time_from_system()
 
 var ticks :int= -600
@@ -243,11 +243,11 @@ func _exit_tree():
 
 func _process(delta):
 	if Options.options["autosaving"]:
-		autosaveTicks += 1
-	if autosaveTicks > 10800: # every 3 minutes
+		autosaveTicks += delta
+	if autosaveTicks > 180.0: # every 3 minutes
 		if GlobalRef.player.velocity.length() < 2.0: # make sure player is standing still
 			Saving.autosave()
-			autosaveTicks = 0
+			autosaveTicks = 0.0
 			print("Game autosaved!")
 	
 	if Input.is_action_just_pressed("pause"):

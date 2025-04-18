@@ -19,7 +19,7 @@ weight = 750
 
 [sub_resource type="Resource" id="Resource_jagty"]
 script = ExtResource("4_rlqay")
-id = 3095
+id = 3036
 amountMin = 1
 amountMax = 1
 weight = 10

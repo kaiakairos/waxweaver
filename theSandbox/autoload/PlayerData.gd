@@ -51,7 +51,8 @@ func _process(delta):
 		if selectedSlot == 49:
 			selectedSlot = selectedSlotRemember
 			emit_signal("selectedSlotChanged")
-	
+
+func _physics_process(delta):
 	if !is_instance_valid(GlobalRef.player):
 		return
 	
@@ -105,6 +106,7 @@ func addItem(itemID,amount,rangeMin:int=0,rangeMax:int=40):
 	
 	var emptySlot = findEmptySlot(rangeMin,rangeMax)
 	if emptySlot == null:
+		#inventory is full
 		return itemCountLeft
 	
 	if itemCountLeft > itemMax:

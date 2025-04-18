@@ -18,7 +18,7 @@ func _ready():
 	
 	size = $shadow.size
 
-func _process(delta):
+func _physics_process(delta):
 	
 	if Engine.is_editor_hint():
 		return

@@ -34,8 +34,9 @@ var state = 0
 var movementState = 0
 
 var animTick = 0
-var ladderTick = 0
-var lastOnLadder :int= 0 # for determining if the player can attach to ladder again
+var ladderTick :float= 0
+var ladderAnimPlayed:bool = false
+var lastOnLadder :float= 0.0 # for determining if the player can attach to ladder again
 var maxCameraDistance := 0
 
 var lastTileItemUsedOn := Vector2(-10,-10)
@@ -44,7 +45,7 @@ var noClip = false
 var noClipSpeed = 200
 
 var tick = 0
-var blinkTick = 0
+var blinkTick :float= 0.0
 
 var beingKnockedback = false
 
@@ -77,12 +78,15 @@ var holdingtick :int = 0
 var justswapped :bool = false
 
 var jumpsRemaining :int = 0
-var hoverTicks :int= 0
-var dashIdle :int = 0
-var canDash :bool = true
-var dashDelay :int = 0
+var hoverTicks :float= 0.0
 
-var holdingDirection :int = 0
+# dash
+var canDash :bool = true
+var dashDelaySecs :float= 0
+var dashParticleSecs :float= 0
+
+var activitySecs :float= 0
+var holdingDirectionSecs :float= 0
 
 
 ######################################################################
@@ -269,22 +273,21 @@ func normalMovement(delta):
 		dir *= -1
 	
 	if dir != 0:
-		
-		
+		var doubletapWindowSecs = (1.0/6.0) # NOTE: make this a setting?
 		if GlobalRef.playerSide == int(dir == 1):
-			if dashIdle < 10 and dashIdle > 0 and holdingDirection < 10:
+			if activitySecs < doubletapWindowSecs and activitySecs > 0 and holdingDirectionSecs < (1.0/6.0):
 				doubleTapped = true
-		dashIdle = -1
+		activitySecs = 0
 		
 		GlobalRef.playerSide = int(dir == 1)
 		
-		holdingDirection += 1
+		holdingDirectionSecs += delta
 		
 		if Input.is_action_just_pressed("move_left") or Input.is_action_just_pressed("move_right"):
-			holdingDirection = 0
+			holdingDirectionSecs = 0
 		
 	else:
-		dashIdle += 1
+		activitySecs += delta
 	
 	if GlobalRef.chatIsOpen:
 		dir = 0
@@ -299,18 +302,21 @@ func normalMovement(delta):
 	
 	var newVel = velocity.rotated(-rotSource)
 	if beingKnockedback:
-		newVel.x = lerp(newVel.x, (dir * speed) + speedAdd, 0.025) # make framerate independent
+		newVel.x = lerp(newVel.x, (dir * speed) + speedAdd, 1.0-pow(2.0,(-delta/0.4562))) # make framerate independent
 	else:
 		newVel.x = lerp(newVel.x, (dir * speed) + speedAdd, 1.0-pow(2.0,(-delta/0.04)))
 	
-	if doubleTapped and canDash and dashDelay <= 0 and Stats.hasProperty("dash"):
+	if doubleTapped and canDash and dashDelaySecs <= 0 and Stats.hasProperty("dash"):
 		newVel.x = 1800.0 * dir * Stats.speedMult
 		canDash = false
-		dashDelay = 30
+		dashDelaySecs = 0.5
+		dashParticleSecs = 0
 		beingKnockedback = false
-	if dashDelay > 0:
-		dashDelay -= 1
+	if dashDelaySecs > 0:
+		dashDelaySecs -= delta
+		dashParticleSecs += delta
 		dashingParticle()
+	
 	
 	newVel.y += Stats.getGravity() * delta
 	newVel.y = min(newVel.y,Stats.getTerminalVelocity())
@@ -383,11 +389,11 @@ func WATERJUMPCAMERALETSGO(body,vel,rot,onFloor,delta):
 	
 	# attach to ladder if holding up
 	if lastOnLadder > 0:
-		lastOnLadder -= 1 # subtract ladder ticks
+		lastOnLadder -= 60 * delta # subtract ladder ticks
 	if body.DATAC.getTileData(tile.x,tile.y) == 25:
 		if Input.is_action_pressed("move_up") or Input.is_action_pressed("move_down"):
 			
-			if lastOnLadder > 0:
+			if lastOnLadder > 0.0:
 				return vel
 			
 			velocity = Vector2.ZERO
@@ -453,16 +459,16 @@ func WATERJUMPCAMERALETSGO(body,vel,rot,onFloor,delta):
 			fart.rotation = sprite.rotation
 			get_parent().add_child(fart)
 	elif Stats.specialProperties.has("bubblehover"):
-		if hoverTicks == 0:
+		if roundi(hoverTicks) == 0:
 			if Input.is_action_just_pressed("jump"):
 				hoverTicks = 120
 		elif hoverTicks > 0 and Input.is_action_pressed("jump"):
-			hoverTicks -= 1
-			vel.y = lerp(vel.y,0.0,0.5)
+			hoverTicks -= 60.0 * delta
+			vel.y = lerp(vel.y,0.0, 1 / ((1/delta) / Engine.physics_ticks_per_second + 1))
 			airTime = 0
 			$Bubble.scale = lerp($Bubble.scale,Vector2(1,1),0.2)
 			$Bubble.rotation = sprite.rotation
-			if hoverTicks == 0:
+			if roundi(hoverTicks) == 0:
 				hoverTicks = -10
 				$Bubble.scale = Vector2.ZERO
 				var fart = load("res://object_scenes/particles/bubblewand/bubblepop.tscn").instantiate()
@@ -490,13 +496,13 @@ func chairMovement(delta):
 		movementState = 0
 	
 	squishSprites(1.0)
-	eyeBallAnim()
+	eyeBallAnim(delta)
 	updateLight()
 	ensureCamPosition()
 
 func ladderMovement(delta):
 	
-	lastOnLadder = 25
+	lastOnLadder = 25.0
 	
 	if beingKnockedback: # cancel ladder state if hit
 		movementState = 0
@@ -516,15 +522,18 @@ func ladderMovement(delta):
 	
 	## animtation
 	if vdir != 0:
-		ladderTick += 1
-		if ladderTick % 7 == 0:
+		ladderTick += delta * 60.0
+		if roundi(ladderTick) % 7 == 0 and !ladderAnimPlayed:
 			if getPlayerFrame() == 8:
 				setAllPlayerFrames(9)
 			else:
 				setAllPlayerFrames(8)
 			SoundManager.playSound("items/ladderClimb",global_position,1.2,0.1)
+			ladderAnimPlayed = true
+		elif roundi(ladderTick) % 7 != 0:
+			ladderAnimPlayed = false
 	else:
-		ladderTick = 6
+		ladderTick = 6.0
 	
 	var obj = planetOn
 	
@@ -568,7 +577,7 @@ func ladderMovement(delta):
 	move_and_slide()
 	
 	squishSprites(1.0)
-	eyeBallAnim()
+	eyeBallAnim(delta)
 	updateLight()
 	ensureCamPosition()
 	
@@ -998,7 +1007,7 @@ func playerAnimation(dir,newVel,delta):
 	if dir != 0:
 		flipPlayer(dir)
 	
-	eyeBallAnim()
+	eyeBallAnim(delta)
 	
 	var flor = isOnFloor(rotated*(PI/2))
 	if shipOn != null:
@@ -1016,23 +1025,23 @@ func playerAnimation(dir,newVel,delta):
 	elif animationPlayer.current_animation != "walk":
 			animationPlayer.play("walk")
 
-func eyeBallAnim():
+func eyeBallAnim(delta):
 	var glob = global_position - get_global_mouse_position()
 	var gay = glob.rotated(-GlobalRef.camera.rotation)
 	$PlayerLayers/eye/Pupil.offset = gay.normalized() * Vector2(-sprite.scale.x,-1)
 	
 	# silly blink
-	blinkTick += 1
-	if blinkTick > 120:
+	blinkTick += delta * 60.0
+	if blinkTick > 120.0:
 		if randi() % 60 == 0:
 			$PlayerLayers/eye.visible = false
-			blinkTick = -5
+			blinkTick = -5.0
 			if randi() % 6 == 0:
-				blinkTick = -15
+				blinkTick = -15.0
 			
-	if blinkTick == 0 or blinkTick == -10:
+	if roundi(blinkTick) == 0 or roundi(blinkTick) == -10:
 		$PlayerLayers/eye.visible = true
-	elif blinkTick == -5:
+	elif roundi(blinkTick) == -5:
 		$PlayerLayers/eye.visible = false
 
 func setAllPlayerFrames(frame:int):
@@ -1333,8 +1342,9 @@ func spawnGiftParticle():
 	get_parent().add_child(ins)
 
 func dashingParticle():
-	var vel = velocity.rotated(-getProperRotationSource()) 
-	if dashDelay % 2 == 0 and abs(vel.x) > 150:
+	var vel = velocity.rotated(-getProperRotationSource())
+	if dashParticleSecs > (2.0/60.0):
+		dashParticleSecs = 0
 		var ins = aura.instantiate()
 		ins.startFrame = $PlayerLayers/body.frame
 		ins.position = position

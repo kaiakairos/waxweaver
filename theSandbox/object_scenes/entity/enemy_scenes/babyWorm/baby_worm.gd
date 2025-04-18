@@ -12,7 +12,7 @@ func _ready():
 		ins.hc = $HealthComponent
 		segmentContainer.add_child(ins)
 
-func _process(delta):
+func _physics_process(delta):
 	var pos = position
 	
 	var speed :float= 60.0

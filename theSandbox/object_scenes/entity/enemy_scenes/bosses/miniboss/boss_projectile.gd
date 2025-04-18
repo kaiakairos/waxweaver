@@ -25,7 +25,8 @@ func _process(delta):
 	if dot > 0.8:
 		speed = 240.0
 	
-	velocity = lerp(velocity,t*speed,0.05)
+	velocity = lerp(velocity,t*speed,1.0 - pow(0.05,delta))
+	
 	var c = move_and_collide(velocity * delta)
 	
 	if c:

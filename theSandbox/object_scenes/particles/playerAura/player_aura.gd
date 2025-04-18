@@ -14,7 +14,7 @@ func setFrame(frame:int):
 			child.flip_h = true
 
 func _process(delta):
-	modulate.a -= 0.02
+	modulate.a -= 0.02 * 60.0 * delta
 	if modulate.a < 0.0:
 		queue_free()
 

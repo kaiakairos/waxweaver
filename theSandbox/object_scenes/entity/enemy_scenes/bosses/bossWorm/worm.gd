@@ -35,7 +35,7 @@ func _ready():
 		ins.hc = $HealthComponent
 		segmentContainer.add_child(ins)
 
-func _process(delta):
+func _physics_process(delta):
 	var oldPosition = position
 	
 	if GlobalRef.player.dead and state != 2:

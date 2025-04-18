@@ -8,10 +8,14 @@ func onUse(tileX:int,tileY:int,planetDir:int,planet,lastTile:Vector2):
 	var items :Array[LootItem] = loottable.getLoot()
 	PlayerData.consumeSelected()
 	for item in items:
-		PlayerData.addItem(item.id,item.amount)
+		var itemCountLeft = PlayerData.addItem(item.id,item.amount)
+		if itemCountLeft > 0:
+			BlockData.spawnItemVelocity(GlobalRef.player.position,item.id,planet,Vector2(0,0),itemCountLeft)
+		else:
+			Indicators.itemPopup(ItemData.getItemName(item.id),item.amount,GlobalRef.player.global_position)
+		
 		print( "Loot found: " + str(item.amount) + " " + ItemData.getItemName(item.id) )
 		
-		Indicators.itemPopup(ItemData.getItemName(item.id),item.amount,GlobalRef.player.global_position)
 		
 	GlobalRef.player.spawnGiftParticle()
 	

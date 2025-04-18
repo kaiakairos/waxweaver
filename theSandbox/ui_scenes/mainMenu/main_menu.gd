@@ -43,7 +43,7 @@ func _ready():
 			enterState(5)
 
 func _process(delta):
-	$bg/backgroundLayer.scroll(Vector2(0.1,0))
+	$bg/backgroundLayer.scroll(Vector2(0.1 * delta * 60.0,0))
 	$MouseIcon.position = get_local_mouse_position()
 	if waitUntilMusic == 1200:
 		$Music.play()
