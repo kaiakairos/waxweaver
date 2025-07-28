@@ -57,9 +57,8 @@ void BLOCK::setNewVariables(){
 }
 
 void BLOCK::setTexture( const char* file ) {
-    ResourceLoader rl;
-    if(rl.exists(file)){
-        texture = rl.load(file);
+    if(ResourceLoader::get_singleton()->exists(file)){
+        texture = ResourceLoader::get_singleton()->load(file);
 
         texImage = texture->get_image();
         texImage->convert(Image::FORMAT_RGBA8);
