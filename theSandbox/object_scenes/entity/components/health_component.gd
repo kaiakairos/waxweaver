@@ -166,10 +166,21 @@ func die(source:String="idk"):
 	if isPlayer:
 		clearAllStatus()
 		parent.dieAndRespawn()
+		
+		var chatName = "Player"
+		var chatmsg = ""
+		if Network.isMultiplayerGame:
+			chatName = Steamworks.steam_username
+		
 		if source != "idk":
-			GlobalRef.sendError("Player died from: " + source)
+			chatmsg = chatName + " died from: " + source
 		else:
-			GlobalRef.sendError("Player died")
+			chatmsg = chatName + " died"
+			
+		GlobalRef.sendError(chatmsg)
+		if Network.isMultiplayerGame:
+			Network.send_p2p_packet(0,{"packetType":"chatMessage","text":chatmsg,"type":"red"})
+		
 		var moneyLost = int(PlayerData.money * 0.3)
 		PlayerData.loseMoney(moneyLost)
 		if moneyLost > 0:

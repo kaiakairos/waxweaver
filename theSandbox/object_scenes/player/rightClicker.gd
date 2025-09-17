@@ -76,6 +76,10 @@ func onRightClick():
 
 		33: # chest 
 			
+			if Network.isMultiplayerGame:
+				if Network.multiplayerOpenedChests.has(tile):
+					return
+			
 			if PlayerData.currentSelectedChest == tile:
 				PlayerData.closeChest()
 				return

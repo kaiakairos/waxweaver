@@ -23,6 +23,10 @@ func _on_saveandquit_pressed():
 	parent.saveGameToFile()
 	get_tree().paused = false
 	SoundManager.deleteAllSounds()
+	
+	if Network.isMultiplayerGame:
+		Network.leave_lobby()
+	
 	get_tree().change_scene_to_file("res://ui_scenes/mainMenu/main_menu.tscn")
 
 

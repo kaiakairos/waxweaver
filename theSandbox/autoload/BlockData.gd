@@ -11,6 +11,8 @@ var lookup = null
 
 var replaceableBlocks :Array[int] = [0,1,17,77,82,90,131]
 
+var aestheticCommands :Array[String] = ["leaf","drip","leafrustle","sparkle","furnacesound","spark","windchime","shopCheck"]
+
 func _ready():
 	var ins = CHUNKDRAW.new()
 	theChunker = ins

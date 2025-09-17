@@ -354,6 +354,15 @@ func saveChestString():
 		chestString = chestString + string + ","
 	
 	chestOBJ.chestDictionary[currentSelectedChest] = chestString
+	
+	sendMultiplayerChesetUpdate(currentSelectedChest,chestString)
+
+func sendMultiplayerChesetUpdate(pos,stringdata):
+	if Network.isMultiplayerGame:
+		# send chest update
+		Network.send_p2p_packet(0,{"packetType":"chestUpdate",
+		"chestPosition":pos,
+		"chestStringData":stringdata})
 
 func saveChestFromArray(data):
 	var chestString = ""
@@ -366,7 +375,6 @@ func saveChestFromArray(data):
 		var string :String= str(id) + "x" + str(amount) + "x" + str(i)
 		# 3010x1x0,13x99x16,
 		chestString = chestString + string + ","
-	
 	return chestString
 
 func loadChestString(chestString:String):
@@ -419,6 +427,9 @@ func loadChest(body,pos):
 	emit_signal("updateInventory")
 	emit_signal("forceOpenInventory")
 	
+	if Network.isMultiplayerGame:
+		Network.send_p2p_packet(0,{"packetType":"chestState","newState":"open","position":currentSelectedChest})
+	
 	return true
 	
 func closeChest():
@@ -427,6 +438,9 @@ func closeChest():
 	
 	saveChestString()
 	clearChestInventory()
+	
+	if Network.isMultiplayerGame:
+		Network.send_p2p_packet(0,{"packetType":"chestState","newState":"closed","position":currentSelectedChest})
 	
 	chestOBJ = null
 	currentSelectedChest = null
@@ -448,6 +462,8 @@ func dropChestContainer(body,pos,string):
 		var id :int = int(itemString.get_slice("x",0))
 		var amount :int = int(itemString.get_slice("x",1))
 		BlockData.spawnLooseItem(body.tileToPos(pos),body,id,amount)
+	
+	
 	closeChest()
 	
 	

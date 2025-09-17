@@ -139,12 +139,15 @@ func _physics_process(delta):
 	#if shouldUpdateLight > 0 and is_instance_valid(GlobalRef.player):
 	GlobalRef.player.updateLightStatic()
 
-func editTiles(changeCommit,doneByPlayer:bool=false):
+func editTiles(changeCommit,doneByPlayer:bool=false,multiplayer_from:int=0):
 	var chunksToUpdate = []
+	
 	for change in changeCommit.keys():
 		var c = changeCommit[change]
 		if c is String:
 			BlockData.doBlockAction(c,change.x,change.y,self)
+			if BlockData.aestheticCommands.has(c):
+				changeCommit.erase(change) # remove strings for multiplayer
 			continue
 		match c:
 			-1:
@@ -212,7 +215,38 @@ func editTiles(changeCommit,doneByPlayer:bool=false):
 	for vec in chunksToUpdate:
 		if chunkDictionary.has(vec):
 			chunkDictionary[vec].drawData()
-			
+	
+	if Network.isMultiplayerGame and multiplayer_from == 0:
+		if changeCommit.size() == 0:
+			return
+		sendMultiplayerBlockUpdate(changeCommit,doneByPlayer)
+		
+
+func sendMultiplayerBlockUpdate(changeCommit,doneByPlayer):
+	
+	var infoDictionary = {}
+	var timeDictionary = {}
+	
+	for changeKey in changeCommit.keys():
+		infoDictionary[changeKey] = DATAC.getInfoData(changeKey.x,changeKey.y) 
+		timeDictionary[changeKey] = DATAC.getTimeData(changeKey.x,changeKey.y) 
+	
+	Network.send_p2p_packet(0,{"packetType":"editTiles",
+	"changes":changeCommit,
+	"infoChange":infoDictionary,"timeChange":timeDictionary,
+	"doneByPlayer":doneByPlayer})
+
+func recieveMultiplayerBlockUpdate(packetData,sender:int):
+	
+	var infoDictionary :Dictionary = packetData["infoChange"]
+	var timeDictionary :Dictionary = packetData["timeChange"]
+	
+	for changeKey in packetData["changes"].keys():
+		DATAC.setInfoData(changeKey.x,changeKey.y,infoDictionary[changeKey]) 
+		DATAC.setTimeData(changeKey.x,changeKey.y,timeDictionary[changeKey]) 
+	
+	editTiles(packetData["changes"],packetData["doneByPlayer"],sender)
+	
 func setLight(x,y,level): ## Useful for settings dynamic moving lights
 	var currentLight = DATAC.getLightData(x,y)
 	if level >= abs(currentLight):

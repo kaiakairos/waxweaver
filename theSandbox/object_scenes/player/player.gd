@@ -88,6 +88,10 @@ var dashParticleSecs :float= 0
 var activitySecs :float= 0
 var holdingDirectionSecs :float= 0
 
+# multiplayer
+var lastDir :int = 0
+var packetUpdateTick :float = 0.0 # send packet again occasionally
+var armorPacketTick :float = 0.0
 
 ######################################################################
 ########################### BASIC FUNTIONS ###########################
@@ -185,6 +189,17 @@ func _process(delta):
 		healthComponent.inflictStatus("suffocating",0.1)
 	
 	$rotateRand.rotation = sprite.rotation
+	
+	# multiplayer packet update
+	if Network.isMultiplayerGame:
+		packetUpdateTick += delta
+		if packetUpdateTick > 1.0:
+			sendMovementPacket(lastDir)
+			packetUpdateTick = 0.0
+		armorPacketTick += delta
+		if armorPacketTick > 100.0:
+			sendArmorData()
+			armorPacketTick = 0.0
 	
 ######################################################################
 ############################## MOVEMENT ##############################
@@ -319,6 +334,10 @@ func normalMovement(delta):
 		dashParticleSecs += delta
 		dashingParticle()
 	
+	if lastDir != dir:
+		
+		lastDir = dir
+		sendMovementPacket(dir)
 	
 	newVel.y += Stats.getGravity() * delta
 	newVel.y = min(newVel.y,Stats.getTerminalVelocity())
@@ -455,11 +474,13 @@ func WATERJUMPCAMERALETSGO(body,vel,rot,onFloor,delta):
 		hoverTicks = 0
 		if Input.is_action_just_pressed("jump") and !GlobalRef.chatIsOpen:
 			vel.y = Stats.getJump()
+			sendMovementPacket(lastDir,abs(Stats.getJump()))
 			
 		lerpCameraRotation(rot,delta)
 	elif jumpsRemaining > 0:
 		if Input.is_action_just_pressed("jump") and !GlobalRef.chatIsOpen:
 			vel.y = Stats.getJump()
+			sendMovementPacket(lastDir,abs(Stats.getJump()))
 			jumpsRemaining -= 1
 			airTime = 0.0 # cancel fall damage
 			var fart = load("res://object_scenes/particles/doubleJump/doublejumpparticle.tscn").instantiate()
@@ -1139,6 +1160,29 @@ func changeArmor():
 	healthComponent.defense = newDefense
 	healthComponent.maxHealth = maxHealth
 	GlobalRef.hotbar.updateDefense(newDefense)
+	
+	sendArmorData()
+
+func sendArmorData():
+	if !Network.isMultiplayerGame:
+		return
+	
+	var helmet :int= PlayerData.inventory[40][0]
+	var chest :int= PlayerData.inventory[41][0]
+	var legs :int= PlayerData.inventory[42][0]
+	
+	var vanityHelmet :int= PlayerData.inventory[50][0]
+	var vanityChest :int= PlayerData.inventory[51][0]
+	var vanityLegs :int= PlayerData.inventory[52][0]
+	
+	if vanityHelmet != -1:
+		helmet = vanityHelmet
+	if vanityChest != -1:
+		chest = vanityChest
+	if vanityLegs != -1:
+		legs = vanityLegs
+	
+	Network.send_p2p_packet(0,{"packetType":"updateArmor","helmet":helmet,"chest":chest,"legs":legs})
 
 ######################################################################
 ############################### MATHS ################################
@@ -1387,3 +1431,10 @@ func lerpCameraRotation(rot,delta):
 	if o > 0.0:
 		interpolation = o
 	GlobalRef.camera.rotation = lerp_angle(GlobalRef.camera.rotation,rot,interpolation)
+
+func sendMovementPacket(movingDir:int,jump:int=0):
+	if !Network.isMultiplayerGame:
+		return
+	Network.send_p2p_packet(0,{"packetType":"playerMovement",
+	"position":position,"newDir":movingDir,"jump":jump,
+	"speed":Stats.getSpeed(), "pupil":$PlayerLayers/eye/Pupil.offset})

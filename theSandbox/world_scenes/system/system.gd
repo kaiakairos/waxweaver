@@ -1,9 +1,11 @@
 extends Node2D
+class_name System
 
 @onready var objectContainer = $Objects
 @onready var cosmicBodyContainer = $CosmicBodies
 
 @onready var planetScene = preload("res://world_scenes/planet/planet.tscn")
+@onready var fakePlayerScene = preload("res://object_scenes/fakePlayer/fake_player.tscn")
 
 @export var rootPlanet := Node2D
 
@@ -16,8 +18,14 @@ var lastSave :float= Time.get_unix_time_from_system()
 
 var ticks :int= -600
 
+var mainPlanet :Planet
+var tickSync :float = 0.0
+
 func _ready():
 	planetsShouldGenerate = !Saving.has_save(Saving.loadedFile)
+	
+	if Saving.loadedFile == "multiplayer":
+		planetsShouldGenerate = false 
 	
 	generateNewSystem()
 	GlobalRef.system = self
@@ -29,6 +37,10 @@ func _ready():
 	$dropShadowViewport.world_2d = get_tree().root.get_viewport().world_2d
 	GlobalRef.lightRenderVP = $lightRenderViewport
 	GlobalRef.dropShadowRenderVP = $dropShadowViewport
+	
+	Network.connect("updatePlayerList",createPlayers)
+	if Network.isMultiplayerGame:
+		createPlayers()
 	
 	await get_tree().create_timer(5.0).timeout
 	
@@ -60,6 +72,8 @@ func generateNewSystem():
 	forestPlanet.orbitDistance = 36000.0
 	forestPlanet.orbitSpeed = 3.0
 	forestPlanet.orbitPeriod = randf_range(0.0,PI * 2) # where along the rotation is it
+	
+	mainPlanet = forestPlanet
 	
 	cosmicBodyContainer.add_child(forestPlanet)
 	
@@ -164,6 +178,11 @@ func saveGameToFile():
 	PlayerData.emit_signal("armorUpdated")
 	
 func loadSaveFromFile():
+	
+	if Saving.loadedFile == "multiplayer":
+		multiplayerWorldLoad()
+		return
+	
 	var gameData = Saving.read_save( Saving.loadedFile )
 	if gameData == null:
 		printerr( "Failed to load save, save file doesn't exist." )
@@ -280,6 +299,13 @@ func _process(delta):
 	if Input.is_action_just_pressed("fullscreen"):
 		fullscreentoggle()
 	
+	# multiplayer
+	if Network.isMultiplayerGame and Network.is_host:
+		tickSync += delta
+		if tickSync > 200.0:
+			Network.send_p2p_packet(0,{"packetType":"syncTime","tick":GlobalRef.globalTick})
+			tickSync = 0.0
+	
 func fullscreentoggle():
 	if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
@@ -292,3 +318,56 @@ func fullscreentoggle():
 	else:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
 	
+
+func multiplayerWorldLoad():
+	var worldData :Dictionary= Network.recievedWorldPackets
+	
+	var tile :String =  bytes_to_var(worldData["tile"].hex_decode())
+	var bg :String =  bytes_to_var(worldData["bg"].hex_decode())
+	var info :String =  bytes_to_var(worldData["info"].hex_decode())
+	var time :String =  bytes_to_var(worldData["time"].hex_decode())
+	var water :String =  bytes_to_var(worldData["water"].hex_decode())
+	var chest :Dictionary =  bytes_to_var(worldData["chest"].hex_decode())
+	mainPlanet.DATAC.loadFromString(tile,bg,info,time,water)
+	mainPlanet.chestDictionary = chest.duplicate()
+	
+	GlobalRef.globalTick = worldData["globaltick"]
+	
+	PlayerData.addItem(3000,1)
+	PlayerData.addItem(3001,1)
+	
+	PlayerData.emit_signal("updateInventory")
+	PlayerData.emit_signal("armorUpdated")
+	
+	Network.recievedWorldPackets = {} # clear it
+
+var fakePlayerDictionary :Dictionary
+
+func createPlayers():
+	var playerIDs = []
+	for player in Network.lobby_members:
+		playerIDs.append(player["steam_id"])
+		if player["steam_id"] == Steamworks.steam_id:
+			continue # don't make a player for ourselves
+		if checkIfPlayerExists(player["steam_id"]):
+			continue # don't recreate existing players
+		
+		var fakePlayer = fakePlayerScene.instantiate()
+		fakePlayer.steam_ID = player["steam_id"]
+		fakePlayer.planet = mainPlanet
+		mainPlanet.entityContainer.add_child(fakePlayer)
+		
+		fakePlayerDictionary[ player["steam_id"] ] = fakePlayer
+	
+	# clear non-existant players
+	for fakePlayerID in fakePlayerDictionary.keys():
+		if playerIDs.has(fakePlayerID):
+			continue
+		getFakePlayer(fakePlayerID).queue_free()
+		fakePlayerDictionary.erase(fakePlayerID)
+
+func checkIfPlayerExists(id:int):
+	return fakePlayerDictionary.has(id)
+
+func getFakePlayer(id:int):
+	return fakePlayerDictionary[ id ]

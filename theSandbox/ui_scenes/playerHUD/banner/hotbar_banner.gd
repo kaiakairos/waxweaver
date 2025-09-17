@@ -94,7 +94,8 @@ func _process(delta):
 	# cheat commands
 	if Input.is_action_just_pressed("openCommand"):
 		
-		if !GlobalRef.commandLineAvailable:
+		
+		if !GlobalRef.commandLineAvailable and !Network.isMultiplayerGame:
 			return
 		
 		if cheatOrigin.visible:
@@ -296,10 +297,29 @@ func interpretCommand(text):
 	#removes enters
 	text = text.replace("\n","")
 	
-	if text != "":
-		previousMessage = text
+	if text == "":
+		return
+	previousMessage = text
+	
+	if text.left(1) != "/":
+		# is chat message
+		var chatName :String= ""
+		if Network.isMultiplayerGame:
+			chatName = Steamworks.steam_username
+		var chatmsg :String = "< " + chatName + " > " + text + " "
+		GlobalRef.sendChat(chatmsg)
+		if Network.isMultiplayerGame:
+			Network.send_p2p_packet(0,{"packetType":"chatMessage","text":chatmsg,"type":"normal"})
+		return
+	
+	text = text.trim_prefix("/") # remove slash from front of command
 	
 	var command = text.get_slice(" ",0)
+	
+	if Network.isMultiplayerGame:
+		if !Network.is_host:
+			GlobalRef.sendChat("You don't have permission to use commands!")
+			return
 	
 	if command == "cheats":
 		GlobalRef.cheatsEnabled = true
@@ -311,7 +331,7 @@ func interpretCommand(text):
 	if !GlobalRef.cheatsEnabled:
 		if true:#OS.has_feature("template"): # only stop commands if release version
 			GlobalRef.sendChat("Cheats are currently disabled.")
-			GlobalRef.sendChat("Type 'cheats' to enable them.")
+			GlobalRef.sendChat("Type '/cheats' to enable them.")
 			GlobalRef.sendChat("Enabling cheats will lock this save")
 			GlobalRef.sendChat("from earning achievements permanently.")
 			return
