@@ -92,6 +92,9 @@ var holdingDirectionSecs :float= 0
 var lastDir :int = 0
 var packetUpdateTick :float = 0.0 # send packet again occasionally
 var armorPacketTick :float = 0.0
+var invPacketTick : float = 0.0
+
+var lastLadderDir :int = 0
 
 ######################################################################
 ########################### BASIC FUNTIONS ###########################
@@ -119,7 +122,7 @@ func _ready():
 	if healthComponent.health == 0 and Saving.worldType == 1:
 		dieAndRespawn() # for hardcore
 	
-	
+	Network.connect("updatePlayerList",newPlayerJoined)
 
 func _process(delta):
 	
@@ -194,12 +197,22 @@ func _process(delta):
 	if Network.isMultiplayerGame:
 		packetUpdateTick += delta
 		if packetUpdateTick > 1.0:
-			sendMovementPacket(lastDir)
+			if movementState == 0:
+				sendMovementPacket(lastDir)
+			elif movementState == 2:
+				sendMovementPacket(lastLadderDir,0,1)
+			elif movementState == 1: # chair
+				sendMovementPacket(roundi(sprite.scale.x),0,2)
 			packetUpdateTick = 0.0
 		armorPacketTick += delta
 		if armorPacketTick > 100.0:
 			sendArmorData()
 			armorPacketTick = 0.0
+		if !Network.is_host:
+			invPacketTick += delta
+			if invPacketTick > 25.0:
+				Network.send_p2p_packet(Network.lobby_host,{"packetType":"inventory","data":PlayerData.inventory},2)
+				invPacketTick = 0.0
 	
 ######################################################################
 ############################## MOVEMENT ##############################
@@ -347,6 +360,8 @@ func normalMovement(delta):
 		body = shipOn
 	$swimmingDetector.body = body
 	newVel = WATERJUMPCAMERALETSGO(body,newVel,rotSource,onFloor,delta)
+	if Input.is_action_just_pressed("jump") or Input.is_action_just_released("jump"): # multiplayer
+		sendMovementPacket(lastDir,0,0)
 	
 	if movementState == 2:
 		updateLight()
@@ -453,6 +468,8 @@ func WATERJUMPCAMERALETSGO(body,vel,rot,onFloor,delta):
 		vel.y = min(vel.y,30 + (Stats.swimMult * 2.5))
 		if Input.is_action_pressed("jump") and !GlobalRef.chatIsOpen:
 			vel.y = -25 - Stats.getSwim()
+		
+		
 		lerpCameraRotation(rot,delta)
 		vel.x = clamp(vel.x, -Stats.getSwim(),Stats.getSwim() )
 		airTime = 0.0 # cancel fall damage
@@ -461,6 +478,7 @@ func WATERJUMPCAMERALETSGO(body,vel,rot,onFloor,delta):
 	if wasInWater and Input.is_action_pressed("jump"):
 		vel.y += -150.0
 		wasInWater = false
+		sendMovementPacket(lastDir,abs(vel.y),0) # jump exit from water
 		# code for leaving water
 			
 	if onFloor: # this is where the regular jump is done
@@ -523,6 +541,7 @@ func chairMovement(delta):
 		lerpCameraRotation(shipOn.rotation,delta)
 	if Input.is_action_pressed("jump"):
 		movementState = 0
+		sendMovementPacket(0,0,0)
 	
 	squishSprites(1.0)
 	eyeBallAnim(delta)
@@ -581,6 +600,7 @@ func ladderMovement(delta):
 	if Input.is_action_pressed("jump"):
 		movementState = 0
 		newVel.y = -250 
+		sendMovementPacket(0,250,0)
 		
 	
 	
@@ -597,6 +617,7 @@ func ladderMovement(delta):
 	if blockType != 25:
 		movementState = 0
 		newVel.y = -250 * int(Input.is_action_pressed("move_up"))
+		sendMovementPacket(0,abs(newVel.y),0)
 	
 	if is_instance_valid(shipOn):
 		velocity = newVel.rotated(shipOn.rotation)
@@ -619,7 +640,9 @@ func ladderMovement(delta):
 	
 	lerpCameraRotation(rotated*(PI/2),delta)
 	
-	
+	if lastLadderDir != vdir:
+		lastLadderDir = vdir
+		sendMovementPacket(lastLadderDir,0,1)
 	
 func bedMovement(delta):
 	
@@ -938,6 +961,8 @@ func chairSit(tile,editBody):
 	setAllPlayerFrames(7)
 	snapToPositionChair(tile,editBody)
 	wasInWater = false
+	
+	sendMovementPacket(roundi(sprite.scale.x),0,2)
 
 func attachToLadder(tile,editBody):
 	animationPlayer.play("climbLadder")
@@ -945,6 +970,8 @@ func attachToLadder(tile,editBody):
 	snapToPosition(tile,editBody)
 	wasInWater = false
 	beingKnockedback = false
+	
+	lastLadderDir = 4 # for multiplayer so we always send packet when attaching to ladder
 
 func snapToPositionChair(tile,editBody):
 	var info = editBody.DATAC.getInfoData(tile.x,tile.y)
@@ -1432,9 +1459,26 @@ func lerpCameraRotation(rot,delta):
 		interpolation = o
 	GlobalRef.camera.rotation = lerp_angle(GlobalRef.camera.rotation,rot,interpolation)
 
-func sendMovementPacket(movingDir:int,jump:int=0):
+func sendMovementPacket(movingDir:int,jump:int=0,type:int=0):
 	if !Network.isMultiplayerGame:
 		return
-	Network.send_p2p_packet(0,{"packetType":"playerMovement",
-	"position":position,"newDir":movingDir,"jump":jump,
-	"speed":Stats.getSpeed(), "pupil":$PlayerLayers/eye/Pupil.offset})
+	match type: 
+		0: # normal
+			Network.send_p2p_packet(0,{"packetType":"playerMovement",
+			"position":position,"newDir":movingDir,"jump":jump,
+			"speed":Stats.getSpeed(), "pupil":$PlayerLayers/eye/Pupil.offset,
+			"type":"normal","holdingJump":Input.is_action_pressed("jump")})
+		1: # ladder
+			Network.send_p2p_packet(0,{"packetType":"playerMovement",
+			"position":position,"newDir":movingDir,"jump":0,
+			"speed":Stats.getSpeed(), "pupil":$PlayerLayers/eye/Pupil.offset,
+			"type":"ladder"})
+		2: # chair
+			Network.send_p2p_packet(0,{"packetType":"playerMovement",
+			"position":position,"newDir":movingDir,"jump":0,
+			"speed":Stats.getSpeed(), "pupil":$PlayerLayers/eye/Pupil.offset,
+			"type":"chair"})
+
+func newPlayerJoined():
+	await get_tree().create_timer(16.0).timeout
+	sendArmorData()

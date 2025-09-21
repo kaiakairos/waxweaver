@@ -30,6 +30,8 @@ var frozen = false
 var coolVelcoity :bool = false
 var pickedByHopper :bool = false
 
+var droppedByEnemy :bool = false
+
 func _ready():
 	var itemData = ItemData.getItem(itemID)
 	
@@ -133,6 +135,11 @@ func getPlanetPosition():
 func _on_area_2d_body_entered(body):
 	
 	if tweening:
+		return
+	if body is FakePlayer:
+		if droppedByEnemy: # don't let other players pick up our sick loot
+			return
+		tweenAndDestroy(body.global_position,false)
 		return
 	tweenAndDestroy(body.global_position,true)
 

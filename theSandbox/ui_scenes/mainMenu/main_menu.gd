@@ -11,6 +11,7 @@ var state :int=0
 # 7: credits
 # 8: medals
 # 9: rename world
+# 10: lobby list
 
 @onready var selectedslot = $savefiles/ScrollContainer/VBoxContainer/saveslot
 
@@ -36,6 +37,8 @@ func _ready():
 	
 	CreatureData.creatureAmount = 0 # ensures mob cap is reset if u leave game
 	CreatureData.passiveAmount = 0
+	
+	Saving.mutliplayerInventories = {}
 	
 	if OS.has_feature("web"): # hide file directory buttons if on web
 		$savefiles/openDirectory.hide()
@@ -69,6 +72,10 @@ func _process(delta):
 		enableConsole += 1
 		if enableConsole >= 5:
 			GlobalRef.commandLineAvailable = true
+	
+	if Input.is_action_just_pressed("debugMultiplayer") and state == 0:
+		enterState(10)
+		$joinLobbyScreen.getLobbyList()
 	
 func enterState(newstate):
 	match newstate:
@@ -107,6 +114,9 @@ func enterState(newstate):
 		9:
 			$renameWorld.show()
 			$savefiles.hide()
+		10:
+			$mainButtons.hide()
+			$joinLobbyScreen.show()
 	
 	$bg/AnimatedSprite2D.visible = newstate == 0
 	$bg/AnimatedSprite2D2.visible = newstate == 0
@@ -270,3 +280,15 @@ func _on_world_type_pressed():
 		2:
 			$createNewWorld/worldType.buttonText = "gamemode: creative"
 	Saving.worldType = worldTypeSet
+
+
+
+
+func _on_back_pressed():
+	$joinLobbyScreen.hide()
+	enterState(0)
+
+
+func _on_lobbies_pressed():
+	enterState(10)
+	$joinLobbyScreen.getLobbyList()

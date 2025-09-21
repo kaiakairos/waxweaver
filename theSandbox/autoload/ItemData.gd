@@ -420,6 +420,8 @@ var data = {
 	3221:load("res://items/tools/explosives/dynamite.tres"),
 	3222:load("res://items/tools/explosives/stickyDynamite.tres"),
 	
+	3223:load("res://items/vanity/miscacc/KuzyaPants.tres"),
+	
 	# chairs 6000 - 6049
 	6000:load("res://items/blocks/furniture/chairs/WoodenChair.tres"),
 	6001:load("res://items/blocks/furniture/chairs/Toilet.tres"),

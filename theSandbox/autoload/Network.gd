@@ -12,6 +12,7 @@ var lobby_host :int = 0
 signal updatePlayerList
 signal successfullyCreatedLobby
 signal successfullyJoinedLobby
+signal lobbyJoinFailure
 
 signal leftLobby
 signal playerLeft(member_id:int)
@@ -34,23 +35,13 @@ func _process(delta: float) -> void:
 	if lobby_id > 0:
 		read_all_p2p_packets()
 	
-	# DEBUG FAKE SHIT DELETE LATER
-	if Input.is_action_just_pressed("debugMultiplayer"):
-		print(is_instance_valid(GlobalRef.currentPlanet))
-		if is_instance_valid(GlobalRef.currentPlanet):
-			# create lobby
-			create_lobby()
-			
-		else:
-			# join lobby
-			join_lobby( DisplayServer.clipboard_get().to_int() )
-			
 
-func create_lobby():
+func create_lobby(lobbyType,maxMembers):
 	if lobby_id == 0: # dont create lobby if lobby already exists
 		is_host = true
-		Steam.createLobby(Steam.LOBBY_TYPE_PUBLIC,lobby_members_max)
+		Steam.createLobby(lobbyType,maxMembers)
 		
+		multiplayerOpenedChests = []
 
 func _on_lobby_created(connect:int, this_lobby_id:int):
 	if connect == 1: # connected 1 means OKAY!! https://godotsteam.com/classes/main/#result for more result options
@@ -61,11 +52,15 @@ func _on_lobby_created(connect:int, this_lobby_id:int):
 		for key in createdLobbyData.keys():
 			Steam.setLobbyData(lobby_id,key,createdLobbyData[key])
 		
+		Steam.setLobbyData(lobby_id,"gamemode",Saving.getWorldTypeName())
+		Steam.setLobbyData(lobby_id,"name",Saving.worldName)
+		Steam.setLobbyData(lobby_id,"host",Steamworks.steam_username)
+		
 		print("Created Lobby with ID: " + str(lobby_id))
 		emit_signal("successfullyCreatedLobby")
 		var set_relay: bool = Steam.allowP2PPacketRelay(true)
 		
-		DisplayServer.clipboard_set(str(this_lobby_id))
+		
 		
 		isMultiplayerGame = true
 		
@@ -84,6 +79,8 @@ func _on_lobby_joined(this_lobby_id: int, _permissions: int, _locked: bool, resp
 		make_p2p_handshake()
 		emit_signal("successfullyJoinedLobby")
 		isMultiplayerGame = true
+	else:
+		emit_signal("lobbyJoinFailure")
 
 func get_lobby_members():
 	lobby_members.clear()
@@ -91,23 +88,35 @@ func get_lobby_members():
 	var numOfMembers: int = Steam.getNumLobbyMembers(lobby_id)
 	for member in range(0,numOfMembers):
 		var member_steam_id: int = Steam.getLobbyMemberByIndex(lobby_id,member)
-		var member_steam_name: String = Steam.getFriendPersonaName(member_steam_id)
+		var member_steam_name: String = Steam.getFriendPersonaName(member_steam_id) # might not always work
 		
 		lobby_members.append({"steam_id": member_steam_id, "steam_name": member_steam_name})
 	
 	print("lobbymembers: " + str(lobby_members))
-	emit_signal("updatePlayerList")
+	emit_signal("updatePlayerList") 
 	
 	var newLobbyOwner = Steam.getLobbyOwner(lobby_id)
-	is_host = newLobbyOwner == Steamworks.steam_id # check if we're now the host
-	lobby_host = newLobbyOwner
+	if lobby_host == 0: # only run this when there's no host set
+		is_host = newLobbyOwner == Steamworks.steam_id # check if we're now the host
+		lobby_host = newLobbyOwner
+	else:
+		var hostInGame :bool= false
+		for member in lobby_members:
+			if member["steam_id"] == lobby_host:
+				hostInGame = true
+		if !hostInGame:
+			get_tree().change_scene_to_file("res://ui_scenes/mainMenu/main_menu.tscn")
+			leave_lobby()
+			
 
 func leave_lobby() -> void:
 	
 	isMultiplayerGame = false
+	lobby_host = 0
+	multiplayerOpenedChests = []
 	
 	if lobby_id == 0:
-		return # do nothing if not in lobby
+		return # do nothing if not in lobby 
 	
 	Steam.leaveLobby(lobby_id)
 	lobby_id = 0
@@ -150,8 +159,9 @@ func _on_lobby_chat_update(this_lobby_id: int, change_id: int, making_change_id:
 		GlobalRef.sendChat("%s did... something." % changer_name)
 	
 	var newLobbyOwner = Steam.getLobbyOwner(lobby_id)
-	is_host = newLobbyOwner == Steamworks.steam_id # check if we're now the host
-	lobby_host = newLobbyOwner
+	if lobby_host == 0:
+		is_host = newLobbyOwner == Steamworks.steam_id # check if we're now the host
+		lobby_host = newLobbyOwner
 	
 	# Update the lobby now that a change has occurred
 	get_lobby_members()
@@ -231,7 +241,12 @@ func interpretPacket(sender:int,packet) -> void:
 		"playerMovement":
 			if is_instance_valid(GlobalRef.system):
 				if GlobalRef.system.checkIfPlayerExists(sender):
-					GlobalRef.system.getFakePlayer(sender).getMovementPacket(packet)
+					if packet["type"] == "normal":
+						GlobalRef.system.getFakePlayer(sender).getMovementPacket(packet)
+					elif packet["type"] == "ladder":
+						GlobalRef.system.getFakePlayer(sender).getLadderPacket(packet)
+					elif packet["type"] == "chair":
+						GlobalRef.system.getFakePlayer(sender).getChairPacket(packet)
 		"updateArmor":
 			if is_instance_valid(GlobalRef.system):
 				if GlobalRef.system.checkIfPlayerExists(sender):
@@ -261,6 +276,40 @@ func interpretPacket(sender:int,packet) -> void:
 				GlobalRef.sendChat(packet["text"])
 			else:
 				GlobalRef.sendError(packet["text"])
+		"playerDie":
+			if GlobalRef.system.checkIfPlayerExists(sender):
+				GlobalRef.system.getFakePlayer(sender).die()
+		"dropItem":
+			BlockData.spawnItemRaw(packet["tileX"],packet["tileY"],packet["item"],GlobalRef.currentPlanet,packet["amount"],true,packet["direction"])
+		"inventory":
+			if !is_host:
+				return
+			
+			Saving.mutliplayerInventories[sender] = packet["data"]
+		"armorStandUpdate":
+			var pos :Vector2i = Vector2i(packet["posX"],packet["posY"])
+			if !BlockData.armorStands.has(pos):
+				return
+			var armorStand = BlockData.armorStands[pos]
+			if !is_instance_valid(armorStand):
+				return
+			
+			armorStand.recievePacket(packet)
+		"itemFrameUpdate":
+			var pos :Vector2i = Vector2i(packet["posX"],packet["posY"])
+			if !BlockData.itemFrames.has(pos):
+				return
+			var itemFrame = BlockData.itemFrames[pos]
+			if !is_instance_valid(itemFrame):
+				return
+			
+			itemFrame.recievePacket(packet)
+		"waterAdd":
+			GlobalRef.currentPlanet.DATAC.setWaterData(packet["posX"],packet["posY"],packet["amount"] * -1.0)
+		"knockbackPlayer":
+			if GlobalRef.system.checkIfPlayerExists(sender):
+				GlobalRef.system.getFakePlayer(sender).getKnockedBack(packet)
+		
 		
 func loadWorld(data:Dictionary):
 	
@@ -274,10 +323,11 @@ func loadWorld(data:Dictionary):
 		"water": recievedWorldPackets["water"] = data["data"]
 		"chest": recievedWorldPackets["chest"] = data["data"]
 		"globaltick": recievedWorldPackets["globaltick"] = data["data"]
+		"inventory": recievedWorldPackets["inventory"] = data["data"]
 	
 	print(str(recievedWorldPackets.size()) + " world packets revieved")
 	
-	if recievedWorldPackets.size() < 7:
+	if recievedWorldPackets.size() < 8:
 		return # world is yet to be loaded
 	
 	Saving.loadedFile = "multiplayer"
@@ -335,9 +385,16 @@ func hostSendWorld(playerID:int = 0):
 	
 	send_p2p_packet(playerID,{"packetType":"worldSend","step":"chest","data":chestHex},2)
 	send_p2p_packet(playerID,{"packetType":"worldSend","step":"globaltick","data":GlobalRef.globalTick},2)
+	
+	if Saving.mutliplayerInventories.has(playerID):
+		send_p2p_packet(playerID,{"packetType":"worldSend","step":"inventory","data":var_to_bytes(Saving.mutliplayerInventories[playerID]).hex_encode()},2)
+	else:
+		send_p2p_packet(playerID,{"packetType":"worldSend","step":"inventory","data":"noData"},2)
 
 func checkIfPlayerInLobby(id:int):
 	for member in lobby_members:
 		if member["steam_id"] == id:
 			return true
 	return false
+
+

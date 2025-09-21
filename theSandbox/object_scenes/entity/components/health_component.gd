@@ -155,6 +155,9 @@ func dealKnockback(amount:float,dir:Vector2,mult:float):
 		parent.velocity = newDir * knockbackResist
 	if isPlayer:
 		parent.beingKnockedback = true
+		if Network.isMultiplayerGame:
+			Network.send_p2p_packet(0,{"packetType":"knockbackPlayer",
+			"position":parent.position,"velocity":parent.velocity})
 	
 func die(source:String="idk"):
 	
@@ -180,6 +183,7 @@ func die(source:String="idk"):
 		GlobalRef.sendError(chatmsg)
 		if Network.isMultiplayerGame:
 			Network.send_p2p_packet(0,{"packetType":"chatMessage","text":chatmsg,"type":"red"})
+			Network.send_p2p_packet(0,{"packetType":"playerDie"})
 		
 		var moneyLost = int(PlayerData.money * 0.3)
 		PlayerData.loseMoney(moneyLost)
@@ -226,6 +230,7 @@ func dropItem(itemID,amount):
 	ins.itemID = itemID
 	ins.amount = amount
 	ins.position = parent.position
+	ins.droppedByEnemy = true
 	parent.get_parent().call_deferred("add_child",ins)
 
 func inflictStatus(effect:String,seconds:float):

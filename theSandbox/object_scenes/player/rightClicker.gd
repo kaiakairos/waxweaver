@@ -312,6 +312,8 @@ func onRightClick():
 			if time < 0:
 				BlockData.spawnItemRaw(tile.x,tile.y,time*-1,editBody)
 				editBody.DATAC.setTimeData(tile.x,tile.y, 1) # remove item
+				if Network.isMultiplayerGame:
+					editBody.editTiles({Vector2i(tile):"itemFramePlace"},true)
 				return
 			var id = PlayerData.getSelectedItemID()
 			if id == -1:
@@ -320,11 +322,15 @@ func onRightClick():
 			PlayerData.consumeSelected()
 			editBody.DATAC.setTimeData(tile.x,tile.y, id * -1)
 			
+			
 			var ins = load("res://items/blocks/furniture/itemFrame/item_frame_display.tscn").instantiate()
 			ins.position = editBody.tileToPos(tile)
 			ins.itemId = id
 			ins.planet = editBody
 			parent.get_parent().add_child(ins)
+			
+			if Network.isMultiplayerGame:
+				editBody.editTiles({Vector2i(tile):"itemFramePlace"},true)
 
 
 func rotateTile(editBody,tile,block,step:int=4):

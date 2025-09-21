@@ -1,0 +1,49 @@
+[gd_scene load_steps=5 format=3 uid="uid://q3r58a5kucgt"]
+
+[ext_resource type="Texture2D" uid="uid://dx82ru7gr64h2" path="res://ui_scenes/playerHUD/inventory/nineRect.png" id="1_4upvq"]
+[ext_resource type="Script" path="res://ui_scenes/multiplayer/playerListItem/player_list_item.gd" id="1_bfak5"]
+[ext_resource type="Texture2D" uid="uid://cc8esrrppap1k" path="res://items/blocks/building/brick.png" id="2_1dk6q"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_4gfna"]
+outline_size = 4
+outline_color = Color(0, 0, 0, 1)
+
+[node name="PlayerListItem" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -250.0
+offset_bottom = -260.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_bfak5")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+layout_mode = 0
+offset_right = 180.0
+offset_bottom = 40.0
+texture = ExtResource("1_4upvq")
+patch_margin_left = 2
+patch_margin_top = 2
+patch_margin_right = 2
+patch_margin_bottom = 2
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 36.0
+offset_bottom = 36.0
+texture = ExtResource("2_1dk6q")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 11.0
+offset_right = 179.0
+offset_bottom = 27.0
+text = "****"
+label_settings = SubResource("LabelSettings_4gfna")
+horizontal_alignment = 1

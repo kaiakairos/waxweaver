@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemArmorLegs" load_steps=4 format=3 uid="uid://t4havmrrgki1"]
+
+[ext_resource type="Texture2D" uid="uid://dwtft6tlh3tr8" path="res://items/vanity/miscacc/kuzya.png" id="1_0v65r"]
+[ext_resource type="Script" path="res://item_resources/item_classes/ItemArmorLegs.gd" id="1_d58u3"]
+[ext_resource type="Texture2D" uid="uid://c6esw586hjyop" path="res://items/vanity/miscacc/kuzyaItem.png" id="3_qgfgc"]
+
+[resource]
+script = ExtResource("1_d58u3")
+defense = 1
+armorTexture = ExtResource("1_0v65r")
+itemName = "Blue Striped Pants"
+subtext = ""
+desc = "corn sticks ...."
+texture = ExtResource("3_qgfgc")
+maxStackSize = 1
+clickToUse = false
+infiniteReach = false

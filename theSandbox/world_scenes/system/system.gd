@@ -6,6 +6,7 @@ class_name System
 
 @onready var planetScene = preload("res://world_scenes/planet/planet.tscn")
 @onready var fakePlayerScene = preload("res://object_scenes/fakePlayer/fake_player.tscn")
+@onready var playerListItemScene = preload("res://ui_scenes/multiplayer/playerListItem/player_list_item.tscn")
 
 @export var rootPlanet := Node2D
 
@@ -41,6 +42,7 @@ func _ready():
 	Network.connect("updatePlayerList",createPlayers)
 	if Network.isMultiplayerGame:
 		createPlayers()
+		
 	
 	await get_tree().create_timer(5.0).timeout
 	
@@ -170,6 +172,8 @@ func saveGameToFile():
 	gameData["money"] = PlayerData.money
 	gameData["shopItems"] = Saving.shopItems
 	
+	gameData["mutliplayerInventories"] = var_to_bytes(Saving.mutliplayerInventories).hex_encode()
+	
 	Saving.write_save(Saving.loadedFile,gameData)
 	
 	lastSave = Time.get_unix_time_from_system() # keep track of time elapsed
@@ -260,6 +264,9 @@ func loadSaveFromFile():
 	else:
 		PlayerData.money = 0
 	
+	if gameData.has("mutliplayerInventories"):
+		Saving.mutliplayerInventories = bytes_to_var( gameData["mutliplayerInventories"].hex_decode() )
+	
 	PlayerData.emit_signal("updateInventory")
 	PlayerData.emit_signal("armorUpdated")
 	
@@ -288,6 +295,7 @@ func _process(delta):
 			return
 		get_tree().paused = !get_tree().paused
 		$PauseMenu.visible = get_tree().paused
+		
 		$PauseMenu/optionsMenu.hide()
 		$PauseMenu/achievementsMenu.hide()
 
@@ -333,13 +341,18 @@ func multiplayerWorldLoad():
 	
 	GlobalRef.globalTick = worldData["globaltick"]
 	
-	PlayerData.addItem(3000,1)
-	PlayerData.addItem(3001,1)
+	if worldData["inventory"] == "noData":
+		PlayerData.addItem(3000,1)
+		PlayerData.addItem(3001,1)
+	else:
+		PlayerData.inventory = bytes_to_var(worldData["inventory"].hex_decode())
 	
 	PlayerData.emit_signal("updateInventory")
 	PlayerData.emit_signal("armorUpdated")
 	
 	Network.recievedWorldPackets = {} # clear it
+	
+	Saving.setWorldType(Steam.getLobbyData(Network.lobby_id,"gamemode"))
 
 var fakePlayerDictionary :Dictionary
 
@@ -355,6 +368,7 @@ func createPlayers():
 		var fakePlayer = fakePlayerScene.instantiate()
 		fakePlayer.steam_ID = player["steam_id"]
 		fakePlayer.planet = mainPlanet
+		fakePlayer.steam_name = player["steam_name"]
 		mainPlanet.entityContainer.add_child(fakePlayer)
 		
 		fakePlayerDictionary[ player["steam_id"] ] = fakePlayer
@@ -365,9 +379,21 @@ func createPlayers():
 			continue
 		getFakePlayer(fakePlayerID).queue_free()
 		fakePlayerDictionary.erase(fakePlayerID)
+	
+	# list
+	for child in $PauseMenu/PlayerList/vbox.get_children():
+		child.queue_free() # just clear the player list 
+	
+	for player in Network.lobby_members:
+		var ins = playerListItemScene.instantiate()
+		ins.playerID = player["steam_id"]
+		ins.username = player["steam_name"]
+		$PauseMenu/PlayerList/vbox.add_child(ins)
+	
 
 func checkIfPlayerExists(id:int):
 	return fakePlayerDictionary.has(id)
 
 func getFakePlayer(id:int):
 	return fakePlayerDictionary[ id ]
+

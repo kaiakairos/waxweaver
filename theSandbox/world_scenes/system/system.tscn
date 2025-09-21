@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://dpnd8ekgo4bj3"]
+[gd_scene load_steps=26 format=3 uid="uid://dpnd8ekgo4bj3"]
 
 [ext_resource type="Script" path="res://world_scenes/system/system.gd" id="1_vw61b"]
 [ext_resource type="PackedScene" uid="uid://d083d45d28pl3" path="res://ui_scenes/camera/game_camera.tscn" id="2_ic1ng"]
@@ -8,6 +8,10 @@
 [ext_resource type="Texture2D" uid="uid://celgr5v0qm8m3" path="res://ui_scenes/mouseCursor/mouseIcon.png" id="5_8xxx0"]
 [ext_resource type="PackedScene" uid="uid://crkseldnn7m4" path="res://ui_scenes/options/options_menu.tscn" id="6_4o6g1"]
 [ext_resource type="PackedScene" uid="uid://d32dl3s4offu" path="res://ui_scenes/achievements/achievementsMenu.tscn" id="7_s47mu"]
+[ext_resource type="Texture2D" uid="uid://csibj827o7h0h" path="res://ui_scenes/mainMenu/saveSlot/rect.png" id="9_wgrag"]
+[ext_resource type="Texture2D" uid="uid://dlexgb4yfmn38" path="res://items/food/birdMeat.png" id="10_44kls"]
+[ext_resource type="FontFile" uid="uid://n3r2v6m6uh2n" path="res://zeeg/font/GrapeSoda.ttf" id="10_qwqs6"]
+[ext_resource type="Texture2D" uid="uid://da1peeaghcog8" path="res://ui_scenes/multiplayer/clipboard.png" id="11_qo8uv"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_nswgb"]
 font_size = 32
@@ -18,6 +22,101 @@ shadow_color = Color(0, 0, 0, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_o15mw"]
 font_color = Color(0.486275, 0.486275, 0.486275, 1)
+outline_size = 4
+outline_color = Color(0, 0, 0, 1)
+shadow_size = 3
+shadow_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8vrhq"]
+bg_color = Color(0.709804, 0.709804, 0.709804, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0, 0, 1)
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slyn1"]
+bg_color = Color(0.658824, 0.658824, 0.658824, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0, 0, 1)
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y2px4"]
+bg_color = Color(0.509804, 0.509804, 0.509804, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0, 0, 1)
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_givww"]
+content_margin_left = 1.0
+content_margin_top = 0.0
+content_margin_right = 4.0
+content_margin_bottom = 0.0
+bg_color = Color(1, 1, 1, 0.176471)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 2
+anti_aliasing = false
+
+[sub_resource type="Theme" id="Theme_yubf3"]
+VScrollBar/styles/grabber = SubResource("StyleBoxFlat_8vrhq")
+VScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_slyn1")
+VScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_y2px4")
+VScrollBar/styles/scroll = SubResource("StyleBoxFlat_givww")
+VScrollBar/styles/scroll_focus = null
+VSlider/constants/center_grabber = 0
+
+[sub_resource type="LabelSettings" id="LabelSettings_lh2no"]
+font_color = Color(1, 0.784314, 0.333333, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ld886"]
+content_margin_top = 8.0
+bg_color = Color(0.129412, 0.129412, 0.129412, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_axa0s"]
+content_margin_top = 8.0
+bg_color = Color(1, 0.784314, 0.333333, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8i1fd"]
+content_margin_top = 8.0
+bg_color = Color(1, 0.631373, 0.333333, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+anti_aliasing = false
+
+[sub_resource type="LabelSettings" id="LabelSettings_l5am2"]
+line_spacing = 1.0
+font = ExtResource("10_qwqs6")
+font_color = Color(0.227451, 0.227451, 0.227451, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_y603t"]
+font_color = Color(0.129412, 0.129412, 0.129412, 1)
 outline_size = 4
 outline_color = Color(0, 0, 0, 1)
 shadow_size = 3
@@ -116,10 +215,17 @@ buttonText = "medals"
 
 [node name="saveandquit" parent="PauseMenu" instance=ExtResource("5_0l5e1")]
 offset_left = 11.0
-offset_top = 185.0
+offset_top = 215.0
 offset_right = 100.0
-offset_bottom = 202.0
+offset_bottom = 232.0
 buttonText = "save and quit"
+
+[node name="createLobbyMenu" parent="PauseMenu" instance=ExtResource("5_0l5e1")]
+offset_left = 11.0
+offset_top = 185.0
+offset_right = 91.0
+offset_bottom = 202.0
+buttonText = "create lobby"
 
 [node name="unpause" parent="PauseMenu" instance=ExtResource("5_0l5e1")]
 offset_left = 11.0
@@ -128,12 +234,129 @@ offset_right = 95.0
 offset_bottom = 92.0
 buttonText = "back to game"
 
+[node name="PlayerList" type="ScrollContainer" parent="PauseMenu"]
+offset_left = 205.0
+offset_top = 13.0
+offset_right = 391.0
+offset_bottom = 287.0
+theme = SubResource("Theme_yubf3")
+
+[node name="vbox" type="VBoxContainer" parent="PauseMenu/PlayerList"]
+layout_mode = 2
+theme_override_constants/separation = 41
+
 [node name="optionsMenu" parent="PauseMenu" instance=ExtResource("6_4o6g1")]
 visible = false
 position = Vector2(194, 0)
 
 [node name="achievementsMenu" parent="PauseMenu" instance=ExtResource("7_s47mu")]
 visible = false
+
+[node name="lobbyCreation" type="Node2D" parent="PauseMenu"]
+visible = false
+position = Vector2(1, -4)
+
+[node name="NinePatchRect" type="NinePatchRect" parent="PauseMenu/lobbyCreation"]
+offset_left = 194.0
+offset_top = 10.0
+offset_right = 392.0
+offset_bottom = 298.0
+texture = ExtResource("9_wgrag")
+patch_margin_left = 8
+patch_margin_top = 8
+patch_margin_right = 8
+patch_margin_bottom = 8
+
+[node name="Label" type="Label" parent="PauseMenu/lobbyCreation"]
+offset_left = 209.0
+offset_top = 23.0
+offset_right = 379.0
+offset_bottom = 45.0
+text = "Create Lobby"
+label_settings = SubResource("LabelSettings_lh2no")
+horizontal_alignment = 1
+
+[node name="visibility" parent="PauseMenu/lobbyCreation" instance=ExtResource("5_0l5e1")]
+offset_left = 211.0
+offset_top = 47.0
+offset_right = 366.0
+offset_bottom = 64.0
+buttonText = "visibility: PUBLIC"
+
+[node name="eugh" parent="PauseMenu/lobbyCreation" instance=ExtResource("5_0l5e1")]
+offset_left = 211.0
+offset_top = 73.0
+offset_right = 293.0
+offset_bottom = 90.0
+buttonText = "max players:"
+
+[node name="createLobby" parent="PauseMenu/lobbyCreation" instance=ExtResource("5_0l5e1")]
+offset_left = 247.0
+offset_top = 269.0
+offset_right = 340.0
+offset_bottom = 286.0
+buttonText = "CREATE LOBBY "
+
+[node name="playerSlider" type="HSlider" parent="PauseMenu/lobbyCreation"]
+offset_left = 211.0
+offset_top = 95.0
+offset_right = 373.0
+offset_bottom = 116.0
+theme_override_constants/center_grabber = 1
+theme_override_constants/grabber_offset = -2075
+theme_override_icons/grabber = ExtResource("10_44kls")
+theme_override_icons/grabber_highlight = ExtResource("10_44kls")
+theme_override_icons/grabber_disabled = ExtResource("10_44kls")
+theme_override_icons/tick = ExtResource("10_44kls")
+theme_override_styles/slider = SubResource("StyleBoxFlat_ld886")
+theme_override_styles/grabber_area = SubResource("StyleBoxFlat_axa0s")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxFlat_8i1fd")
+min_value = 1.0
+max_value = 32.0
+value = 10.0
+scrollable = false
+
+[node name="player count" type="Label" parent="PauseMenu/lobbyCreation"]
+modulate = Color(0.368627, 0.368627, 0.368627, 1)
+offset_left = 310.0
+offset_top = 74.0
+offset_right = 375.0
+offset_bottom = 90.0
+text = "10"
+horizontal_alignment = 2
+
+[node name="Label2" type="Label" parent="PauseMenu/lobbyCreation"]
+offset_left = 219.0
+offset_top = 125.0
+offset_right = 372.0
+offset_bottom = 274.0
+text = "WARNING: Multiplayer is experimental!! Currently, enemies are not synced. Expect bugs and glitches. Don't play multiplayer on a world you care a lot about !!"
+label_settings = SubResource("LabelSettings_l5am2")
+autowrap_mode = 2
+
+[node name="lobbyID" type="Node2D" parent="PauseMenu"]
+visible = false
+position = Vector2(27, 269)
+
+[node name="Clipboard" type="Sprite2D" parent="PauseMenu/lobbyID"]
+modulate = Color(0.129412, 0.129412, 0.129412, 1)
+position = Vector2(-14, 16)
+texture = ExtResource("11_qo8uv")
+
+[node name="Label2" type="Label" parent="PauseMenu/lobbyID"]
+offset_left = 3.0
+offset_top = 8.0
+offset_right = 154.0
+offset_bottom = 24.0
+text = "lobby id: 12904012974102"
+label_settings = SubResource("LabelSettings_y603t")
+
+[node name="copyLobbyID" type="Button" parent="PauseMenu/lobbyID"]
+modulate = Color(1, 1, 1, 0)
+offset_left = -23.0
+offset_top = 4.0
+offset_right = 220.0
+offset_bottom = 28.0
 
 [node name="MouseIcon" type="Sprite2D" parent="PauseMenu"]
 position = Vector2(251, 192)
@@ -144,4 +367,10 @@ offset = Vector2(4, 4)
 [connection signal="pressed" from="PauseMenu/options" to="PauseMenu" method="_on_options_pressed"]
 [connection signal="pressed" from="PauseMenu/medals" to="PauseMenu" method="_on_medals_pressed"]
 [connection signal="pressed" from="PauseMenu/saveandquit" to="PauseMenu" method="_on_saveandquit_pressed"]
+[connection signal="pressed" from="PauseMenu/createLobbyMenu" to="PauseMenu" method="_on_create_lobby_menu_pressed"]
 [connection signal="pressed" from="PauseMenu/unpause" to="PauseMenu" method="_on_unpause_pressed"]
+[connection signal="menuClosed" from="PauseMenu/optionsMenu" to="PauseMenu" method="_on_options_menu_menu_closed"]
+[connection signal="pressed" from="PauseMenu/lobbyCreation/visibility" to="PauseMenu" method="_on_visibility_pressed"]
+[connection signal="pressed" from="PauseMenu/lobbyCreation/createLobby" to="PauseMenu" method="_on_create_lobby_pressed"]
+[connection signal="value_changed" from="PauseMenu/lobbyCreation/playerSlider" to="PauseMenu" method="_on_player_slider_value_changed"]
+[connection signal="pressed" from="PauseMenu/lobbyID/copyLobbyID" to="PauseMenu" method="_on_copy_lobby_id_pressed"]

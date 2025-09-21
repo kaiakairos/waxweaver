@@ -13,6 +13,11 @@ var replaceableBlocks :Array[int] = [0,1,17,77,82,90,131]
 
 var aestheticCommands :Array[String] = ["leaf","drip","leafrustle","sparkle","furnacesound","spark","windchime","shopCheck"]
 
+#blockentitycontainers
+var pinwheels :Dictionary = {}
+var itemFrames :Dictionary = {}
+var armorStands :Dictionary = {}
+
 func _ready():
 	var ins = CHUNKDRAW.new()
 	theChunker = ins
@@ -264,13 +269,15 @@ func placeDoor(tileX:int,tileY:int,planet,startInfo:int,infoOffset:int,side:int)
 func spawnLooseItem(position,body,id,amount):
 	
 	if id == -1:
-		return
+		return null
 	
 	var ins = groundItemScene.instantiate()
 	ins.itemID = id
 	ins.amount = amount
 	ins.position = position
 	body.entityContainer.add_child(ins)
+	
+	return ins
 
 func getSoundMaterialID(blockID) -> int:
 	var d = theChunker.getBlockDictionary(blockID)
@@ -478,6 +485,13 @@ func doBlockAction(action:String,tileX:int,tileY:int,planet):
 			
 			planet.entityContainer.add_child(ins)
 		"itemFramePlace":
+			
+			if itemFrames.has(Vector2i(tileX,tileY)):
+				if is_instance_valid(itemFrames[Vector2i(tileX,tileY)]):
+					return
+				else:
+					itemFrames.erase(Vector2i(tileX,tileY))
+			
 			var time = planet.DATAC.getTimeData(tileX,tileY)
 			if time > 0:
 				return
@@ -487,9 +501,16 @@ func doBlockAction(action:String,tileX:int,tileY:int,planet):
 			ins.position = planet.tileToPos(Vector2(tileX,tileY))
 			ins.itemId = itemID
 			ins.planet = planet
+			
+			itemFrames[Vector2i(tileX,tileY)] = ins
+			
 			planet.entityContainer.add_child(ins)
 		"summonArmorStand":
-			#print("yep, im an armor stand")
+			if armorStands.has(Vector2i(tileX,tileY)):
+				if is_instance_valid(armorStands[Vector2i(tileX,tileY)]):
+					return
+				else:
+					armorStands.erase(Vector2i(tileX,tileY))
 			var ins = load("res://items/blocks/furniture/armorstand/armor_stand.tscn").instantiate()
 			ins.position = planet.tileToPos(Vector2(tileX,tileY))
 			ins.planet = planet
@@ -498,12 +519,21 @@ func doBlockAction(action:String,tileX:int,tileY:int,planet):
 			ins.basetilex = tileX
 			ins.basetiley = tileY
 			
+			armorStands[Vector2i(tileX,tileY)] = ins
+			
 			var FUCK = Vector2i( Vector2(0,-1).rotated(ins.rotation) )
 			ins.toptilex = tileX + FUCK.x
 			ins.toptiley = tileY + FUCK.y
 			
 			planet.entityContainer.add_child(ins)
 		"summonPinwheel":
+			
+			if pinwheels.has(Vector2i(tileX,tileY)):
+				if is_instance_valid(pinwheels[Vector2i(tileX,tileY)]):
+					return
+				else:
+					pinwheels.erase(Vector2i(tileX,tileY))
+			
 			var ins = load("res://items/blocks/furniture/pinwheel/pinwheel.tscn").instantiate()
 			ins.position = planet.tileToPos(Vector2(tileX,tileY))
 			ins.planet = planet
@@ -511,6 +541,7 @@ func doBlockAction(action:String,tileX:int,tileY:int,planet):
 			
 			ins.basetilex = tileX
 			ins.basetiley = tileY
+			pinwheels[Vector2i(tileX,tileY)] = ins
 			
 			planet.entityContainer.add_child(ins)
 		

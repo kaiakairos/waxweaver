@@ -582,7 +582,7 @@ theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleBoxFlat_rlutm")
 theme_override_styles/focus = SubResource("StyleBoxFlat_xwntq")
 theme_override_styles/read_only = SubResource("StyleBoxFlat_ku4qx")
-placeholder_text = "enter command"
+placeholder_text = "enter message"
 caret_blink = true
 
 [node name="BossHealthbar" type="Node2D" parent="."]

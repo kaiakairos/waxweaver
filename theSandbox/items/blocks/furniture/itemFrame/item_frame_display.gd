@@ -43,3 +43,10 @@ func destroy(dropItem:bool):
 		BlockData.spawnItemRaw(p.x,p.y,itemId,planet)
 	
 	queue_free()
+
+func sendUpdatePacket():
+	if !Network.isMultiplayerGame:
+		return
+
+func recievePacket(packet:Dictionary):
+	pass

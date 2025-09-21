@@ -19,6 +19,9 @@ func _process(delta):
 	var collider = move_and_collide(velocity*delta)
 	if collider:
 		setWater(2.0)
+		if Network.isMultiplayerGame:
+			var pos = getPos()
+			Network.send_p2p_packet(0,{"packetType":"waterAdd","amount":2.0,"posX":pos.x,"posY":pos.y})
 		SoundManager.playSound("enemy/swim2",global_position,4.0,0.1)
 		deactivate()
 	

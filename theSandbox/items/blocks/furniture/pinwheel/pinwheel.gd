@@ -23,3 +23,6 @@ func _process(delta):
 	var chunk = Vector2(int(basetilex)/8,int(basetiley)/8)
 	if !planet.chunkDictionary.has(chunk):
 		queue_free()
+
+func checkIsPostion(x:int,y:int):
+	return basetilex == x and basetiley == y

@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=3 uid="uid://bx0771l28p0cu"]
+[gd_scene load_steps=45 format=3 uid="uid://bx0771l28p0cu"]
 
 [ext_resource type="Script" path="res://ui_scenes/mainMenu/main_menu.gd" id="1_y2dfr"]
 [ext_resource type="Texture2D" uid="uid://16yss77fimhy" path="res://ui_scenes/mainMenu/bg.png" id="2_2i3we"]
@@ -20,6 +20,7 @@
 [ext_resource type="Texture2D" uid="uid://dlexgb4yfmn38" path="res://items/food/birdMeat.png" id="15_lq83u"]
 [ext_resource type="Texture2D" uid="uid://6mmultwm20pw" path="res://ui_scenes/mainMenu/creditIcons.png" id="16_avgr1"]
 [ext_resource type="Texture2D" uid="uid://csibj827o7h0h" path="res://ui_scenes/mainMenu/saveSlot/rect.png" id="16_kilqg"]
+[ext_resource type="Script" path="res://ui_scenes/mainMenu/joinLobbyScreen.gd" id="18_72svt"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_e2jik"]
 atlas = ExtResource("2_q71dy")
@@ -178,6 +179,26 @@ shadow_size = 12
 shadow_color = Color(0, 0, 0, 1)
 shadow_offset = Vector2(2, 2)
 
+[sub_resource type="LabelSettings" id="LabelSettings_mjk8v"]
+font_color = Color(0.129412, 0.129412, 0.129412, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_4l11p"]
+font_size = 32
+font_color = Color(1, 0.784314, 0.333333, 1)
+outline_size = 4
+outline_color = Color(0, 0, 0, 1)
+shadow_size = 4
+shadow_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cljap"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r6drp"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_q3tcx"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
 [node name="mainMenu" type="Node2D"]
 script = ExtResource("1_y2dfr")
 
@@ -224,42 +245,51 @@ position = Vector2(-3, 101)
 
 [node name="play" parent="mainButtons/buttons" instance=ExtResource("6_amthu")]
 offset_left = 359.0
+offset_top = -9.0
 offset_right = 386.0
+offset_bottom = 8.0
 buttonText = "play"
+
+[node name="lobbies" parent="mainButtons/buttons" instance=ExtResource("6_amthu")]
+offset_left = 341.0
+offset_top = 18.0
+offset_right = 386.0
+offset_bottom = 35.0
+buttonText = "lobbies"
 
 [node name="medals" parent="mainButtons/buttons" instance=ExtResource("6_amthu")]
 offset_left = 342.0
-offset_top = 28.0
+offset_top = 43.0
 offset_right = 386.0
-offset_bottom = 45.0
+offset_bottom = 60.0
 buttonText = "medals"
 
 [node name="tutorial" parent="mainButtons/buttons" instance=ExtResource("6_amthu")]
 offset_left = 336.0
-offset_top = 56.0
+offset_top = 68.0
 offset_right = 386.0
-offset_bottom = 73.0
+offset_bottom = 85.0
 buttonText = "tutorial"
 
 [node name="options" parent="mainButtons/buttons" instance=ExtResource("6_amthu")]
 offset_left = 339.0
-offset_top = 84.0
+offset_top = 93.0
 offset_right = 386.0
-offset_bottom = 101.0
+offset_bottom = 110.0
 buttonText = "options"
 
 [node name="discord" parent="mainButtons/buttons" instance=ExtResource("6_amthu")]
 offset_left = 339.0
-offset_top = 112.0
+offset_top = 119.0
 offset_right = 386.0
-offset_bottom = 129.0
+offset_bottom = 136.0
 buttonText = "discord"
 
 [node name="credits" parent="mainButtons/buttons" instance=ExtResource("6_amthu")]
 offset_left = 341.0
-offset_top = 140.0
+offset_top = 144.0
 offset_right = 386.0
-offset_bottom = 157.0
+offset_bottom = 161.0
 buttonText = "credits"
 
 [node name="quit" parent="mainButtons/buttons" instance=ExtResource("6_amthu")]
@@ -911,6 +941,96 @@ text = "CREDITS"
 label_settings = SubResource("LabelSettings_ukjca")
 horizontal_alignment = 1
 
+[node name="joinLobbyScreen" type="Node2D" parent="."]
+visible = false
+script = ExtResource("18_72svt")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="joinLobbyScreen"]
+offset_left = 6.0
+offset_top = 41.0
+offset_right = 394.0
+offset_bottom = 256.0
+texture = ExtResource("16_kilqg")
+patch_margin_left = 8
+patch_margin_top = 8
+patch_margin_right = 8
+patch_margin_bottom = 8
+
+[node name="ScrollContainer" type="ScrollContainer" parent="joinLobbyScreen/NinePatchRect"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 29.0
+offset_right = 380.0
+offset_bottom = 208.0
+theme = SubResource("Theme_y2kaf")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="joinLobbyScreen/NinePatchRect/ScrollContainer"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="previewText" type="Label" parent="joinLobbyScreen"]
+offset_left = 7.0
+offset_top = 123.0
+offset_right = 393.0
+offset_bottom = 152.0
+label_settings = SubResource("LabelSettings_mjk8v")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NinePatchRect2" type="NinePatchRect" parent="joinLobbyScreen"]
+offset_left = 6.0
+offset_top = 261.0
+offset_right = 299.0
+offset_bottom = 294.0
+texture = ExtResource("16_kilqg")
+patch_margin_left = 8
+patch_margin_top = 8
+patch_margin_right = 8
+patch_margin_bottom = 8
+
+[node name="Label" type="Label" parent="joinLobbyScreen"]
+offset_left = 6.0
+offset_top = 5.0
+offset_right = 394.0
+offset_bottom = 43.0
+text = "Lobby List"
+label_settings = SubResource("LabelSettings_4l11p")
+horizontal_alignment = 1
+
+[node name="textEdit" type="TextEdit" parent="joinLobbyScreen"]
+offset_left = 16.0
+offset_top = 267.0
+offset_right = 294.0
+offset_bottom = 291.0
+theme_override_fonts/font = ExtResource("9_j42vm")
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_cljap")
+theme_override_styles/focus = SubResource("StyleBoxFlat_r6drp")
+theme_override_styles/read_only = SubResource("StyleBoxFlat_q3tcx")
+placeholder_text = "Lobby ID"
+caret_blink = true
+
+[node name="joinFromID" parent="joinLobbyScreen" instance=ExtResource("6_amthu")]
+offset_left = 316.0
+offset_top = 269.0
+offset_right = 384.0
+offset_bottom = 286.0
+buttonText = "Join Lobby"
+
+[node name="reloadButton" parent="joinLobbyScreen" instance=ExtResource("6_amthu")]
+offset_left = 342.0
+offset_top = 49.0
+offset_right = 383.0
+offset_bottom = 66.0
+buttonText = "reload"
+
+[node name="back" parent="joinLobbyScreen" instance=ExtResource("6_amthu")]
+offset_left = 17.0
+offset_top = 49.0
+offset_right = 46.0
+offset_bottom = 66.0
+buttonText = "back"
+
 [node name="MouseIcon" type="Sprite2D" parent="."]
 position = Vector2(430, 268)
 texture = ExtResource("8_d6c0u")
@@ -927,7 +1047,19 @@ stream = ExtResource("9_ailx1")
 volume_db = -12.0
 bus = &"MUSIC"
 
+[node name="joiningLobby" type="Node2D" parent="."]
+visible = false
+
+[node name="Label" type="Label" parent="joiningLobby"]
+offset_top = 122.0
+offset_right = 400.0
+offset_bottom = 179.0
+text = "Joining world..."
+label_settings = SubResource("LabelSettings_pkadl")
+horizontal_alignment = 1
+
 [connection signal="pressed" from="mainButtons/buttons/play" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="mainButtons/buttons/lobbies" to="." method="_on_lobbies_pressed"]
 [connection signal="pressed" from="mainButtons/buttons/medals" to="." method="_on_medals_pressed"]
 [connection signal="pressed" from="mainButtons/buttons/tutorial" to="." method="_on_tutorial_pressed"]
 [connection signal="pressed" from="mainButtons/buttons/options" to="." method="_on_options_pressed"]
@@ -951,3 +1083,7 @@ bus = &"MUSIC"
 [connection signal="pressed" from="disclaimer/NinePatchRect/okayDisclaimer" to="." method="_on_okay_disclaimer_pressed"]
 [connection signal="pressed" from="tutorial/g/gobacktutorial" to="." method="_on_gobacktutorial_pressed"]
 [connection signal="pressed" from="credits/g/gobackcredits" to="." method="_on_gobackcredits_pressed"]
+[connection signal="text_changed" from="joinLobbyScreen/textEdit" to="joinLobbyScreen" method="_on_text_edit_text_changed"]
+[connection signal="pressed" from="joinLobbyScreen/joinFromID" to="joinLobbyScreen" method="_on_join_from_id_pressed"]
+[connection signal="pressed" from="joinLobbyScreen/reloadButton" to="joinLobbyScreen" method="_on_reload_button_pressed"]
+[connection signal="pressed" from="joinLobbyScreen/back" to="." method="_on_back_pressed"]

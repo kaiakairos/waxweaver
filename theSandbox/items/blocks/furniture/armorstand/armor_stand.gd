@@ -35,11 +35,11 @@ func _process(delta):
 func breakArmorStand():
 	
 	if ItemData.getItem(hat) is ItemArmorHelmet:
-		dropItem(hat)
+		dropItem(hat,true)
 	if ItemData.getItem(chest) is ItemArmorChest:
-		dropItem(chest)
+		dropItem(chest,true)
 	if ItemData.getItem(legs) is ItemArmorLegs:
-		dropItem(legs)
+		dropItem(legs,true)
 
 	queue_free()
 
@@ -123,6 +123,8 @@ func _on_color_rect_gui_input(event):
 		stripArmorStand()
 	
 	updateArmorVisual()
+	
+	sendUpdatePacket()
 
 func stripArmorStand():
 	var chat = planet.DATAC.getInfoData(basetilex,basetiley)
@@ -142,5 +144,25 @@ func stripArmorStand():
 		planet.DATAC.setTimeData(basetilex,basetiley,0)
 		return
 
-func dropItem(id:int):
-	BlockData.spawnLooseItem(planet.tileToPos(Vector2(toptilex,toptiley)),planet,id,1)
+func dropItem(id:int,fakePlayerCanPick:bool = false):
+	var item = BlockData.spawnLooseItem(planet.tileToPos(Vector2(toptilex,toptiley)),planet,id,1)
+	if !fakePlayerCanPick:
+		item.droppedByEnemy = true
+
+func sendUpdatePacket():
+	if !Network.isMultiplayerGame:
+		return
+	
+	var chat = planet.DATAC.getInfoData(basetilex,basetiley)
+	var cchest = planet.DATAC.getTimeData(toptilex,toptiley)
+	var clegs = planet.DATAC.getTimeData(basetilex,basetiley)
+	
+	Network.send_p2p_packet(0,{"packetType":"armorStandUpdate",
+	"hat":chat,"chest":cchest,"legs":clegs,
+	"posX":basetilex,"posY":basetiley})
+
+func recievePacket(packet:Dictionary):
+	planet.DATAC.setInfoData(basetilex,basetiley,packet["hat"])
+	planet.DATAC.setTimeData(toptilex,toptiley,packet["chest"])
+	planet.DATAC.setTimeData(basetilex,basetiley,packet["legs"])
+	updateArmorVisual()

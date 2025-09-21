@@ -23,6 +23,8 @@ func emptyBucket(tileX:int,tileY:int,planetDir:int,planet,lastTile:Vector2):
 	
 	if waterLevel > 0.6:
 		planet.DATAC.setWaterData(tileX,tileY,0.0)
+		if Network.isMultiplayerGame:
+			Network.send_p2p_packet(0,{"packetType":"waterAdd","amount":0.0,"posX":tileX,"posY":tileY})
 		PlayerData.replaceSelectedSlot(3026,1)
 		sound(tileX,tileY,planet)
 
@@ -33,12 +35,16 @@ func fullBucket(tileX:int,tileY:int,planetDir:int,planet,lastTile:Vector2):
 	
 	if waterLevel < 0.8:
 		planet.DATAC.setWaterData(tileX,tileY,0.8)
+		if Network.isMultiplayerGame:
+			Network.send_p2p_packet(0,{"packetType":"waterAdd","amount":0.8,"posX":tileX,"posY":tileY})
 		PlayerData.replaceSelectedSlot(3025,1)
 		sound(tileX,tileY,planet)
 
 func magicBucket(tileX:int,tileY:int,planetDir:int,planet,lastTile:Vector2):
 	
 	planet.DATAC.setWaterData(tileX,tileY,1.0)
+	if Network.isMultiplayerGame:
+		Network.send_p2p_packet(0,{"packetType":"waterAdd","amount":1.0,"posX":tileX,"posY":tileY})
 	sound(tileX,tileY,planet,true)
 
 func sound(tileX:int,tileY:int,planet,quiet:bool=false):

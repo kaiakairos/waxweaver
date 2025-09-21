@@ -9,6 +9,8 @@ var shopItems :Array= []
 # handles save files
 # static save files, save1, save2, save3....
 
+var mutliplayerInventories :Dictionary= {} # steamID : [ [-1,-1], [-1,-1], ... ]
+
 func _ready():
 	pass
 
@@ -86,3 +88,23 @@ func checkforgamesave():
 			return true
 	return false
 			
+
+func getWorldTypeName() -> String:
+	match worldType:
+		0:
+			return "normal"
+		1:
+			return "permadeath"
+		2:
+			return "creative"
+	
+	return "normal"
+	
+func setWorldType(balls:String) -> void:
+	match balls:
+		"normal":
+			worldType = 0
+		"permadeath":
+			worldType = 1
+		"creative":
+			worldType = 2

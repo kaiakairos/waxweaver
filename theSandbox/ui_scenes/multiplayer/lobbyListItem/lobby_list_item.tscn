@@ -1,0 +1,68 @@
+[gd_scene load_steps=5 format=3 uid="uid://cuvct2v7m05cj"]
+
+[ext_resource type="Script" path="res://ui_scenes/multiplayer/lobbyListItem/lobby_list_item.gd" id="1_m6s5s"]
+[ext_resource type="Texture2D" uid="uid://dx82ru7gr64h2" path="res://ui_scenes/playerHUD/inventory/nineRect.png" id="1_ty35g"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_cjjq1"]
+outline_size = 4
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_obd0l"]
+font_color = Color(0.27451, 0.27451, 0.27451, 1)
+
+[node name="lobbyListItem" type="Control"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 50.0
+offset_bottom = 52.0
+script = ExtResource("1_m6s5s")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+layout_mode = 0
+offset_right = 364.0
+offset_bottom = 51.0
+texture = ExtResource("1_ty35g")
+patch_margin_left = 2
+patch_margin_top = 2
+patch_margin_right = 2
+patch_margin_bottom = 2
+
+[node name="lobbyName" type="Label" parent="."]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 8.0
+offset_right = 279.0
+offset_bottom = 51.0
+text = "Lobby Name"
+label_settings = SubResource("LabelSettings_cjjq1")
+
+[node name="lobbyUserName" type="Label" parent="."]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 28.0
+offset_right = 286.0
+offset_bottom = 51.0
+text = "kaiakairos's lobby"
+label_settings = SubResource("LabelSettings_obd0l")
+
+[node name="playerCount" type="Label" parent="."]
+layout_mode = 0
+offset_left = 227.0
+offset_top = 8.0
+offset_right = 354.0
+offset_bottom = 43.0
+text = "3 / 30
+normal"
+label_settings = SubResource("LabelSettings_obd0l")
+horizontal_alignment = 2
+
+[node name="GetID" type="Button" parent="."]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 363.0
+offset_bottom = 50.0
+
+[connection signal="pressed" from="GetID" to="." method="_on_get_id_pressed"]

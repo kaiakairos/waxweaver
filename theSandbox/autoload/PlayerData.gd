@@ -519,9 +519,17 @@ func _unhandled_input(event):
 			3:
 				return
 			0:
-				var planet = GlobalRef.player.planetOn
+				var planet = GlobalRef.player.planetOn # block dropping
 				var tile = planet.posToTile(GlobalRef.player.position)
 				BlockData.spawnItemRaw(tile.x,tile.y,slot[0],planet,slot[1],true, mouseX - 1 )
+				if Network.isMultiplayerGame:
+					Network.send_p2p_packet(0,{"packetType":"dropItem",
+					"item":slot[0],
+					"amount":slot[1],
+					"direction":mouseX - 1,
+					"tileX":tile.x,
+					"tileY":tile.y,
+					})
 			2:
 				var planet = GlobalRef.player.shipOn
 				var tile = planet.posToTile(GlobalRef.player.shipOn.to_local(GlobalRef.player.global_position))
