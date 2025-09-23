@@ -14,10 +14,12 @@ shadow_color = Color(0, 0, 0, 1)
 script = ExtResource("1_romb3")
 
 [node name="Label" type="Label" parent="."]
-offset_left = -558.0
-offset_top = -21.0
+offset_left = -396.0
+offset_top = -113.0
 offset_right = -5.0
-offset_bottom = 3.0
+offset_bottom = -4.0
 text = "ERROR: piss yourself"
 label_settings = SubResource("LabelSettings_oe1ui")
 horizontal_alignment = 2
+vertical_alignment = 2
+autowrap_mode = 3

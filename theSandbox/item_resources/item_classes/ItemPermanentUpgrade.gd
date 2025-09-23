@@ -27,3 +27,10 @@ func onUse(tileX:int,tileY:int,planetDir:int,planet,lastTile:Vector2):
 				PlayerData.consumeSelected()
 				GlobalRef.player.healthComponent.heal(100)
 				GlobalRef.player.spawnGiftParticle()
+	
+	if Network.isMultiplayerGame and !Network.is_host:
+		var urp :int = 0
+		urp += int(GlobalRef.claimedPraffinBossPrize)
+		urp += int(GlobalRef.claimedWormBossPrize) * 2
+		urp += int(GlobalRef.claimedFinalBossPrize) * 4
+		Network.send_p2p_packet(Network.lobby_host,{"packetType":"healthUpgrade","health":urp},2)

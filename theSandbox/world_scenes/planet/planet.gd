@@ -139,7 +139,7 @@ func _physics_process(delta):
 	#if shouldUpdateLight > 0 and is_instance_valid(GlobalRef.player):
 	GlobalRef.player.updateLightStatic()
 
-func editTiles(changeCommit,doneByPlayer:bool=false,multiplayer_from:int=0):
+func editTiles(changeCommit,doneByPlayer:bool=false,multiplayer_from:int=0,packetType:int=0):
 	var chunksToUpdate = []
 	
 	for change in changeCommit.keys():
@@ -219,10 +219,10 @@ func editTiles(changeCommit,doneByPlayer:bool=false,multiplayer_from:int=0):
 	if Network.isMultiplayerGame and multiplayer_from == 0:
 		if changeCommit.size() == 0:
 			return
-		sendMultiplayerBlockUpdate(changeCommit,doneByPlayer)
+		sendMultiplayerBlockUpdate(changeCommit,doneByPlayer,packetType)
 		
 
-func sendMultiplayerBlockUpdate(changeCommit,doneByPlayer):
+func sendMultiplayerBlockUpdate(changeCommit,doneByPlayer,packetType:int = 0):
 	
 	var infoDictionary = {}
 	var timeDictionary = {}
@@ -234,7 +234,7 @@ func sendMultiplayerBlockUpdate(changeCommit,doneByPlayer):
 	Network.send_p2p_packet(0,{"packetType":"editTiles",
 	"changes":changeCommit,
 	"infoChange":infoDictionary,"timeChange":timeDictionary,
-	"doneByPlayer":doneByPlayer})
+	"doneByPlayer":doneByPlayer},packetType)
 
 func recieveMultiplayerBlockUpdate(packetData,sender:int):
 	

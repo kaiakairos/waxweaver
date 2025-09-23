@@ -8,9 +8,12 @@ var color :Color = Color.WHITE
 
 var ticks :float= 0.0
 
+var lineHeight :int = 0
+
 func _ready():
 	modulate = color
 	label.text = text
+	lineHeight = label.get_line_count()
 
 func _process(delta):
 	ticks += delta

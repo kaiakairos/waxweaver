@@ -23,7 +23,16 @@ var steam_name :String = "Player"
 
 var gettingKnockedBack :bool = false
 
+var updateUserNameTick :float = 0.1
+
 func _ready():
+	Steam.connect("persona_state_change",updateUsername)
+	$username.text = steam_name
+
+func updateUsername(id,flags):
+	if id != steam_ID:
+		return
+	steam_name = Steam.getFriendPersonaName(steam_ID)
 	$username.text = steam_name
 
 func _process(delta:float) -> void:
@@ -44,6 +53,12 @@ func _process(delta:float) -> void:
 	updateAnimation(delta)
 	rotation = quad * (PI/2)
 	up_direction = Vector2(0,-1).rotated(quad * (PI/2))
+	
+	if updateUserNameTick > 0.0:
+		updateUserNameTick += delta
+		if updateUserNameTick > 5.0:
+			updateUsername(steam_ID,0)
+			updateUserNameTick = -3.0
 
 func move(delta:float) -> void:
 	var newVel :Vector2= velocity.rotated( quad * (PI/2) * -1 )

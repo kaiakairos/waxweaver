@@ -5,6 +5,7 @@ var searchingForLobbyList :bool = false
 
 func _ready():
 	Steam.connect("lobby_match_list",interpretLobbies)
+	Steam.lobby_joined.connect(_on_lobby_joined)
 	Network.connect("lobbyJoinFailure",lobbyFailure)
 
 func getLobbyList():
@@ -52,8 +53,7 @@ func placeIDInBox(id:int):
 func _on_join_from_id_pressed():
 	
 	Network.join_lobby( $textEdit.text.to_int() )
-	hide()
-	$"../joiningLobby".show()
+	
 
 
 func _on_text_edit_text_changed():
@@ -77,3 +77,23 @@ func lobbyFailure():
 
 func _on_reload_button_pressed():
 	getLobbyList()
+
+func _on_lobby_joined(this_lobby_id: int, _permissions: int, _locked: bool, response: int):
+	if response != Steam.CHAT_ROOM_ENTER_RESPONSE_SUCCESS:
+		return
+	
+	hide()
+	$"../joiningLobby/Label".text = "Joining world..."
+	$"../joiningLobby".show()
+	
+	await get_tree().create_timer(60.0).timeout
+	Network.leave_lobby()
+	$"../joiningLobby/Label".text = "Timed out. Failed to recieve world data."
+	
+	$"../joiningLobby/gulp".show()
+	await $"../joiningLobby/gulp".pressed
+	
+	$"../joiningLobby".hide()
+	$"../joiningLobby/gulp".hide()
+	show()
+	

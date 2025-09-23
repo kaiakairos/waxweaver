@@ -467,10 +467,12 @@ func printIntoChat(text:String,color:Color = Color.WHITE):
 	newMessage.text = text
 	newMessage.color = color
 	
-	for oldMessage in chat.get_children():
-		oldMessage.position.y -= 24
-	
 	chat.add_child(newMessage)
+	
+	for oldMessage in chat.get_children():
+		if newMessage == oldMessage:
+			continue
+		oldMessage.position.y -= 24 * newMessage.lineHeight
 
 func displayItemName(text:String,itemData:Item):
 	

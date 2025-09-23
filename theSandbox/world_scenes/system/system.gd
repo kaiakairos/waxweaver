@@ -173,6 +173,7 @@ func saveGameToFile():
 	gameData["shopItems"] = Saving.shopItems
 	
 	gameData["mutliplayerInventories"] = var_to_bytes(Saving.mutliplayerInventories).hex_encode()
+	gameData["multiplayerHealths"] = var_to_bytes(Saving.multiplayerHealths).hex_encode()
 	
 	Saving.write_save(Saving.loadedFile,gameData)
 	
@@ -267,6 +268,9 @@ func loadSaveFromFile():
 	if gameData.has("mutliplayerInventories"):
 		Saving.mutliplayerInventories = bytes_to_var( gameData["mutliplayerInventories"].hex_decode() )
 	
+	if gameData.has("multiplayerHealths"):
+		Saving.multiplayerHealths = bytes_to_var( gameData["multiplayerHealths"].hex_decode() )
+	
 	PlayerData.emit_signal("updateInventory")
 	PlayerData.emit_signal("armorUpdated")
 	
@@ -353,6 +357,8 @@ func multiplayerWorldLoad():
 	Network.recievedWorldPackets = {} # clear it
 	
 	Saving.setWorldType(Steam.getLobbyData(Network.lobby_id,"gamemode"))
+	
+	setMultiplayerHealth(worldData["health"])
 
 var fakePlayerDictionary :Dictionary
 
@@ -397,3 +403,38 @@ func checkIfPlayerExists(id:int):
 func getFakePlayer(id:int):
 	return fakePlayerDictionary[ id ]
 
+func setMultiplayerHealth(urgh:int):
+	match urgh:
+		0:
+			GlobalRef.claimedPraffinBossPrize = false
+			GlobalRef.claimedWormBossPrize = false
+			GlobalRef.claimedFinalBossPrize = false
+		1:
+			GlobalRef.claimedPraffinBossPrize = true
+			GlobalRef.claimedWormBossPrize = false
+			GlobalRef.claimedFinalBossPrize = false
+		2:
+			GlobalRef.claimedPraffinBossPrize = false
+			GlobalRef.claimedWormBossPrize = true
+			GlobalRef.claimedFinalBossPrize = false
+		3:
+			GlobalRef.claimedPraffinBossPrize = true
+			GlobalRef.claimedWormBossPrize = true
+			GlobalRef.claimedFinalBossPrize = false
+		4:
+			GlobalRef.claimedPraffinBossPrize = false
+			GlobalRef.claimedWormBossPrize = false
+			GlobalRef.claimedFinalBossPrize = true
+		5:
+			GlobalRef.claimedPraffinBossPrize = true
+			GlobalRef.claimedWormBossPrize = false
+			GlobalRef.claimedFinalBossPrize = true
+		6:
+			GlobalRef.claimedPraffinBossPrize = false
+			GlobalRef.claimedWormBossPrize = true
+			GlobalRef.claimedFinalBossPrize = true
+		7:
+			GlobalRef.claimedPraffinBossPrize = true
+			GlobalRef.claimedWormBossPrize = true
+			GlobalRef.claimedFinalBossPrize = true
+		

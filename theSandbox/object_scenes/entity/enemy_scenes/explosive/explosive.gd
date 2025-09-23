@@ -101,7 +101,7 @@ func explode():
 				changes[Vector2i(pos.x + x - radius,pos.y + y - radius)] = -1
 	
 	setLight(3.0)
-	planet.editTiles(changes)
+	planet.editTiles(changes,true,0,2)
 	queue_free()
 
 func setColor():

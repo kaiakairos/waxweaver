@@ -1058,6 +1058,14 @@ text = "Joining world..."
 label_settings = SubResource("LabelSettings_pkadl")
 horizontal_alignment = 1
 
+[node name="gulp" parent="joiningLobby" instance=ExtResource("6_amthu")]
+visible = false
+offset_left = 190.0
+offset_top = 150.0
+offset_right = 217.0
+offset_bottom = 167.0
+buttonText = "OK"
+
 [connection signal="pressed" from="mainButtons/buttons/play" to="." method="_on_play_pressed"]
 [connection signal="pressed" from="mainButtons/buttons/lobbies" to="." method="_on_lobbies_pressed"]
 [connection signal="pressed" from="mainButtons/buttons/medals" to="." method="_on_medals_pressed"]

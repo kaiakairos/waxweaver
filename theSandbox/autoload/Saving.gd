@@ -10,6 +10,7 @@ var shopItems :Array= []
 # static save files, save1, save2, save3....
 
 var mutliplayerInventories :Dictionary= {} # steamID : [ [-1,-1], [-1,-1], ... ]
+var multiplayerHealths :Dictionary= {}
 
 func _ready():
 	pass

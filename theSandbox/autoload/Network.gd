@@ -309,7 +309,11 @@ func interpretPacket(sender:int,packet) -> void:
 		"knockbackPlayer":
 			if GlobalRef.system.checkIfPlayerExists(sender):
 				GlobalRef.system.getFakePlayer(sender).getKnockedBack(packet)
-		
+		"healthUpgrade":
+			if !is_host:
+				return
+			
+			Saving.multiplayerHealths[sender] = packet["health"]
 		
 func loadWorld(data:Dictionary):
 	
@@ -323,7 +327,9 @@ func loadWorld(data:Dictionary):
 		"water": recievedWorldPackets["water"] = data["data"]
 		"chest": recievedWorldPackets["chest"] = data["data"]
 		"globaltick": recievedWorldPackets["globaltick"] = data["data"]
-		"inventory": recievedWorldPackets["inventory"] = data["data"]
+		"inventory": 
+			recievedWorldPackets["inventory"] = data["data"]
+			recievedWorldPackets["health"] = data["health"]
 	
 	print(str(recievedWorldPackets.size()) + " world packets revieved")
 	
@@ -387,9 +393,12 @@ func hostSendWorld(playerID:int = 0):
 	send_p2p_packet(playerID,{"packetType":"worldSend","step":"globaltick","data":GlobalRef.globalTick},2)
 	
 	if Saving.mutliplayerInventories.has(playerID):
-		send_p2p_packet(playerID,{"packetType":"worldSend","step":"inventory","data":var_to_bytes(Saving.mutliplayerInventories[playerID]).hex_encode()},2)
+		var h = 0
+		if Saving.multiplayerHealths.has(playerID):
+			h = Saving.multiplayerHealths[playerID]
+		send_p2p_packet(playerID,{"packetType":"worldSend","step":"inventory","data":var_to_bytes(Saving.mutliplayerInventories[playerID]).hex_encode(),"health":h},2)
 	else:
-		send_p2p_packet(playerID,{"packetType":"worldSend","step":"inventory","data":"noData"},2)
+		send_p2p_packet(playerID,{"packetType":"worldSend","step":"inventory","data":"noData","health":0},2)
 
 func checkIfPlayerInLobby(id:int):
 	for member in lobby_members:

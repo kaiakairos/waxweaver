@@ -12,6 +12,10 @@ func _ready():
 	Steam.connect("persona_state_change",updateUsername)
 	Steam.connect("avatar_loaded",onAvatarLoaded)
 	Steam.getPlayerAvatar(2,playerID)
+	
+	await get_tree().create_timer(0.5).timeout
+	
+	$Crown.visible = playerID == Network.lobby_host
 
 func _process(delta):
 	tick += delta

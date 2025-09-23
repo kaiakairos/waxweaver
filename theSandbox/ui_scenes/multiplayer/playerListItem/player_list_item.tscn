@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://q3r58a5kucgt"]
+[gd_scene load_steps=6 format=3 uid="uid://q3r58a5kucgt"]
 
 [ext_resource type="Texture2D" uid="uid://dx82ru7gr64h2" path="res://ui_scenes/playerHUD/inventory/nineRect.png" id="1_4upvq"]
 [ext_resource type="Script" path="res://ui_scenes/multiplayer/playerListItem/player_list_item.gd" id="1_bfak5"]
 [ext_resource type="Texture2D" uid="uid://cc8esrrppap1k" path="res://items/blocks/building/brick.png" id="2_1dk6q"]
+[ext_resource type="Texture2D" uid="uid://bbfl8tcqb2gcq" path="res://ui_scenes/multiplayer/playerListItem/crown.png" id="4_l74v4"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_4gfna"]
 outline_size = 4
@@ -47,3 +48,9 @@ offset_bottom = 27.0
 text = "****"
 label_settings = SubResource("LabelSettings_4gfna")
 horizontal_alignment = 1
+
+[node name="Crown" type="Sprite2D" parent="."]
+visible = false
+modulate = Color(1, 0.784314, 0.333333, 1)
+position = Vector2(174, 34)
+texture = ExtResource("4_l74v4")
